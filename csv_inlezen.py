@@ -3,25 +3,31 @@ import csv
 
 reservationList=[]
 zonesList=[]
+carsList=[]
+
 with open('toy1.csv', mode='r') as csv_file:
     csv_reader = csv.reader(csv_file , delimiter=";")
-    line_count=0
     for row in csv_reader:
-        if row[0][0]=="r":
-            if line_count== 0 :
-                print(f'{", ".join(row)}')
-                line_count += 1
-            else:
-                autos= row[5].split(',')
-                print(f'{row[0]} ,{row[1]} , {row[2]}, {row[3]}, {row[4]}, {autos}, {row[6]}, {row[7]}')
-                reservationList.append(row)
-                line_count += 1
-        elif row[0][0] == "z":
+        if row[0][0]=="r": #reservation
+            tempReservation=[]
+            for i in range(len(row)):
+                
+                if(i==5): #index of the auto's list
+                    autos= row[i].split(',')
+                    tempReservation.append(autos)
+                else:
+                    tempReservation.append(row[i])
+            reservationList.append(tempReservation)
+        elif row[0][0] == "z": # zone
+            tempZone=[]
+            tempZone.append(row[0])
             zones= row[1].split(',')
-            print(f'{row[0]},{zones}')
-        else:
-            print(f'{row}')
+            tempZone.append(zones)
+            zonesList.append(tempZone)
+        else: #car
+            carsList.append(row[0])
             
-print(reservationList[0][5])
-auto_list=reservationList[0][5].split(',')
-print(auto_list)
+            
+print(reservationList)
+print(carsList)
+print(zonesList)
