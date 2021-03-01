@@ -11,7 +11,6 @@ with open('toy1.csv', mode='r') as csv_file:
         if row[0][0]=="r": #reservation
             tempReservation=[]
             for i in range(len(row)):
-                
                 if(i==5): #index of the auto's list
                     autos= row[i].split(',')
                     tempReservation.append(autos)
