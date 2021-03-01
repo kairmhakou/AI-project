@@ -1,3 +1,5 @@
+import csv
+
 class Reservation:
     id = 0
     resIDtoStr = {}
@@ -66,53 +68,66 @@ class Car:
 
 """
 i = 0
-while(1): #read zone lines of csv 
-    z =  "z"+str(i) #replace = '...' by the zoneID from csv
-    Car.zoneIDtoStr[i] = z  
-    Car.zoneStrtoID[z] = i
-    i+=1
-    if(i>=5):#if last zone line
-        break
-i = 0
-while(1):# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
-    AdjectentZone = ['z0','z2'] #replace by list in CSV file
-    #convert string IDs to numerical IDs
-    arr = []
-    for z in AdjectentZone:
-        arr.append(Car.zoneStrtoID[z])
-    Car.zoneIDtoADJ[i] = arr
-    i+=1
-    if(i>=5):#if last zone line
-        break
-j = 0
-cars = []
-while(1): #read car lines of csv 
-    cars.append(Car())
-    c = "car"+str(j) #replace = ... by the carID from csv
-    Car.carIDtoStr[j] =  c
-    Car.carStrtoID[c] = j
-    j+=1
-    if(j>=5):#if last car line
-        break
+#read csv file
+
+with open('toy1.csv', mode='r') as csv_file:
+    csv_reader = csv.reader(csv_file , delimiter=";")
     
-k = 0
-reservations = []
-while(1):
-    #Replace these variables by values in csv file
-    ID = 'req1'
-    day = 1
-    startTime = 600
-    duration = 60
-    P1 = 500
-    P2 = 50
-    OptionalCars = ['car1','car2','car3']
-    r = Reservation(day,startTime,duration,P1,P2,OptionalCars) 
-    reservations.append(r)
-    Reservation.resIDtoStr[k] = ID 
-    
-    k+=1
-    if(i>=1):
-        break
+    for row in csv_reader:
+        if row[0][0]== "z":
+        # while(1): #read zone lines of csv 
+            
+            z =  row[0] #replace = '...' by the zoneID from csv
+            Car.zoneIDtoStr[i] = z  
+            Car.zoneStrtoID[z] = i
+            i+=1
+            # if(i>=5):#if last car line
+            #     break
+            
+        i = 0
+        if row[0][0]== "z":
+        # while(1):# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
+            zones= row[1].split(',')
+            AdjectentZone = zones #replace by list in CSV file
+            #convert string IDs to numerical IDs
+            arr = []
+            for z in AdjectentZone:
+                arr.append(Car.zoneStrtoID[z])
+            Car.zoneIDtoADJ[i] = arr
+            i+=1
+            # if(i>=5):#if last car line
+            #     break
+        j = 0
+        cars = []
+        if row[0][0]== "c": #read car lines of csv 
+            cars.append(Car())
+            c = row[0] #replace = ... by the carID from csv
+            Car.carIDtoStr[j] =  c
+            Car.carStrtoID[c] = j
+            j+=1
+            # if(j>=5):#if last car line
+            #     break
+            
+        k = 0
+        reservations = []
+        # while(1):
+        if row[0][0]== "r":
+            #Replace these variables by values in csv file
+            ID = row[0]
+            day = row[2]
+            startTime = row[3]
+            duration = row[4]
+            P1 = row[6]
+            P2 = row[7]
+            autos= row[5].split(',')
+            OptionalCars = autos
+            r = Reservation(day,startTime,duration,P1,P2,OptionalCars) 
+            reservations.append(r)
+            Reservation.resIDtoStr[k] = ID 
+            
+            k+=1
+            # if(i>=1):
+            #     break
 print('Reservations:')
 for r in reservations:
     print('   ',r)
