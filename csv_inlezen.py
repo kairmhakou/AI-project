@@ -16,6 +16,7 @@ with open('toy1.csv', mode='r') as csv_file:
             line_count += 1
     print(f'Processed {line_count} lines.')
 
+
 print(reservation_list[0][5])
 auto_list=reservation_list[0][5].split(',')
 print(auto_list)
