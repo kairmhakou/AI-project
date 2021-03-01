@@ -73,7 +73,7 @@ with open('toy1.csv', mode='r') as csv_file:
             tempReservation=[]
             for i in range(len(row)):
                 
-                if(i==5): #index of the auto's list
+                if(i==5): #index of the auto's list in a row of reservations
                     autos= row[i].split(',')
                     tempReservation.append(autos)
                 else:
@@ -90,15 +90,12 @@ with open('toy1.csv', mode='r') as csv_file:
 
 i = 0
 for zone in zonesList: #read zone lines of csv 
-    z =  zone[0] #replace = '...' by the zoneID from csv
+    z =  zone[0] #zoneID
     Car.zoneIDtoStr[i] = z  
     Car.zoneStrtoID[z] = i
     i+=1
-    # if(i>=5):#if last zone line
-    #     break
-
+   
 i = 0
-
 for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
     AdjectentZone = zone[1] #replace by list in CSV file
     #convert string IDs to numerical IDs
@@ -107,18 +104,16 @@ for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ
         arr.append(Car.zoneStrtoID[z])
     Car.zoneIDtoADJ[i] = arr
     i+=1
-    # if(i>=5):#if last zone line
-    #     break
+    
 j = 0
 cars = []
 for car in carsList: #read car lines of csv 
     cars.append(Car())
-    c = car #replace = ... by the carID from csv
+    c = car #carID
     Car.carIDtoStr[j] =  c
     Car.carStrtoID[c] = j
     j+=1
-    # if(j>=5):#if last car line
-    #     break
+    
     
 k = 0
 reservations = []
@@ -134,13 +129,9 @@ for res in reservationList:
     OptionalCars = res[5]
     r = Reservation(day,startTime,duration,P1,P2,OptionalCars) 
     reservations.append(r)
-    
     Reservation.resIDtoStr[k] = ID 
-    
     k+=1
-    # if(i>=1):
-    #     break
-
+    
 print('Reservations:')
 for r in reservations:
     print('   ',r)
