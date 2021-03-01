@@ -16,29 +16,29 @@ class ReservatieLijst:
         self.l=len(self.lijst)
         
     def bereken(self):#Kost berekenen
-        print '****************kost berekenen **********************'
+        print ('****************kost berekenen **********************')
         self.kost=0
         i=0
         while i<self.l:
             r=self.lijst[i]
             self.kost+= r.x1*r.P1 + r.x2*r.P2
             i+=1
-        print 'De kost is momenteel=', self.kost
+        print ('De kost is momenteel=', self.kost)
     
     def voegtoe(self,a):
         self.lijst.append(a)
         self.l+=1
         
     def comp(self,a,b):#kijken wat het verschil zou zijn voor een swap
-        print '****************Vergelijk de kost **********************'
+        print ('****************Vergelijk de kost **********************')
         kostA=a.x1*a.P1 + a.x2*a.P2
         kostB=b.x1*b.P1 + b.x2*b.P2
         verschil= kostB-kostA
-        print 'vershil:', verschil
+        print ('vershil:', verschil)
         return verschil
     
     def swap(self,a,b):# effectief swappen
-        print '****************Swappen **********************'
+        print ('****************Swappen **********************')
         i=0
         while i<self.l:
             if self.lijst[i]==a:
