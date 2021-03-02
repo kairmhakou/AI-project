@@ -79,7 +79,7 @@ class ReservatieLijst:
             r=self.lijst[i]
             self.kost+= r.x1*r.P1 + r.x2*r.P2
             i+=1
-        print ('De kost is momenteel=', self.kost)
+        print 'De kost is momenteel=', self.kost
     
     def voegtoe(self,a):
         self.lijst.append(a)
@@ -90,7 +90,7 @@ class ReservatieLijst:
         kostA=a.x1*a.P1 + a.x2*a.P2
         kostB=b.x1*b.P1 + b.x2*b.P2
         verschil= kostB-kostA
-        print ('vershil:', verschil)
+        print 'vershil:', verschil
         return verschil
     
     def swap(self,a,b):# effectief swappen
@@ -156,7 +156,8 @@ for car in carsList: #read car lines of csv
     
     
 k = 0
-reservations = []
+Kost=ReservatieLijst()
+
 print(reservationList)
 for res in reservationList:
     #Replace these variables by values in csv file
@@ -168,17 +169,16 @@ for res in reservationList:
     P2 = res[7]
     OptionalCars = res[5]
     r = Reservation(day,startTime,duration,P1,P2,OptionalCars) 
-    reservations.append(r)
+    Kost.voegtoe(r)
     Reservation.resIDtoStr[k] = ID 
     k+=1
     
-Kost=ReservatieLijst(reservations)
 Kost.bereken()
-Kost.comp(reservations[3],reservations[7])
-Kost.swap(reservations[3],reservations[7])
+Kost.comp(Kost.lijst[3],Kost.lijst[7])
+Kost.swap(Kost.lijst[3],Kost.lijst[7])
     
 print('Reservations:')
-for r in reservations:
+for r in Kost.lijst:
     print('   ',r)
 print('Cars:')
 for c in cars:
