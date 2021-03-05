@@ -3,7 +3,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     reservationList=[]
     zonesList=[]
     carsList=[]
-
+    # read from csv file
     with open(f, mode='r') as csv_file:
         csv_reader = csv.reader(csv_file , delimiter=";")
         for row in csv_reader:
@@ -23,16 +23,10 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
                 zones= row[1].split(',')
                 tempZone.append(zones)
                 zonesList.append(tempZone)
-            else: #car
+            else: 
                 carsList.append(row[0])
                 
-                
-    print(reservationList)
-    print(carsList)
-    print(zonesList)
-    #return reservationList,carsList,zonesList
-    
-    #def enterData(reservationList,carsList,zonesList):
+    # enter into datastructures        
     cars = []
     reservatieLijst = []
     i = 0
@@ -53,7 +47,6 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         i+=1
         
     j = 0
-
     for car in carsList: #read car lines of csv 
         cars.append(Car())
         c = car #carID
@@ -61,18 +54,15 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         Car.carStrtoID[c] = j
         j+=1
         
-        
     k = 0
-    #Kost=ReservatieLijst()
     print(reservationList)
     for res in reservationList:
-        #Replace these variables by values in csv file
         ID = res[0]
         day = res[2]
         startTime = res[3]
         duration = res[4]
-        P1 = res[6]
-        P2 = res[7]
+        P1 = int(res[6])
+        P2 = int(res[7])
         OptionalCars = res[5]
         r = Reservation(day,startTime,duration,P1,P2,OptionalCars)
         reservatieLijst.append(r) 

@@ -8,8 +8,8 @@ class Reservation:
         self.start = int(day)*1440+int(start) #○convert to minutes (24*60 minutes per day)
         self.end = self.start + int(duration) #cast day, start, duration from txt to int
         
-        self.P1 = 7 #P1 # cost for not assigning Reservation
-        self.P2 = 15 #P2 # cost for assigning to adjecent zone
+        self.P1 = P1  # cost for not assigning Reservation
+        self.P2 = P2  # cost for assigning to adjecent zone
         
         self.x1 = 1 #1 -> not assigned
         self.x2 = 0 #1 -> assigned to adjecent zone
@@ -25,7 +25,8 @@ class Reservation:
             return True
         return False
     def __str__(self):
-        s = Reservation.resIDtoStr[self.id]
+        s = str(self.id)+ " "
+        s += Reservation.resIDtoStr[self.id]
         s+= ", CarOptions: "+ str(self.options)
         s+= ", start/end: "+str(self.start)+'/'+str(self.end)
         s+= ", P1/P2: "+str(self.P1)+'/'+str(self.P2)
@@ -54,45 +55,28 @@ class Car:
         
 
     def __str__(self):
-        s =  Car.carIDtoStr[self.id]
+        s = str(self.id)+" "
+        s +=  Car.carIDtoStr[self.id]
         s += " in zone: "+str(Car.zoneIDtoStr[self.zone])
-        s += " / res: "
+        s += " / reservations: "
         s += str(self.res)
         return s
     
-class ReservatieLijst:
-    def __init__(self,lijst=None):
-        self.kost=0
-        if lijst==None:
-            self.lijst=[]
-        else:
-            self.lijst=lijst
-        self.l=len(self.lijst)
+class Cost: #Was reservatieLijt
+    def getCost(lijst):#Kost berekenen
+        cost=0
+        for r in lijst:
+            cost+= r.x1*r.P1 + r.x2*r.P2
+        return cost
         
-    def bereken(self):#Kost berekenen
-        print ('****************kost berekenen **********************')
-        self.kost=0
-        i=0
-        while i<self.l:
-            r=self.lijst[i]
-            self.kost+= r.x1*r.P1 + r.x2*r.P2
-            i+=1
-        print ('De kost is momenteel=', self.kost)
-    
-    def voegtoe(self,a):
-        self.lijst.append(a)
-        self.l+=1
-        
-    def comp(self,a,b):#kijken wat het verschil zou zijn voor een swap
-        print ('****************Vergelijk de kost **********************')
+    def comp(a,b):#kijken wat het verschil zou zijn voor een swap
         kostA=a.x1*a.P1 + a.x2*a.P2
         kostB=b.x1*b.P1 + b.x2*b.P2
         verschil= kostB-kostA
         print( 'vershil:', verschil)
         return verschil
     
-    def swap(self,a,b):# effectief swappen
-        print ('****************Swappen **********************')
+    def swap(self,a,b):# effectief swappen (dit swapt niet echt iets tho)
         i=0
         while i<self.l:
             if self.lijst[i]==a:

@@ -1,16 +1,13 @@
 from readCSV import readCSV
 from datastructure import Car
 from datastructure import Reservation
+from datastructure import Cost
     
 def main():
-
     cars, reservatieLijst = readCSV(Car,Reservation,'toy1.csv')
-
-    """   
-    Kost.bereken()
-    Kost.comp(Kost.lijst[3],Kost.lijst[7])
-    Kost.swap(Kost.lijst[3],Kost.lijst[7])
-    """   
+    cost = Cost.getCost(reservatieLijst)
+    
+    print("cost:",cost)
     print('Reservations:')
     for r in reservatieLijst:
         print('   ',r)
