@@ -1,5 +1,3 @@
-import csv
-
 class Reservation:
     id = 0
     resIDtoStr = {}
@@ -79,7 +77,7 @@ class ReservatieLijst:
             r=self.lijst[i]
             self.kost+= r.x1*r.P1 + r.x2*r.P2
             i+=1
-        print 'De kost is momenteel=', self.kost
+        print ('De kost is momenteel=', self.kost)
     
     def voegtoe(self,a):
         self.lijst.append(a)
@@ -90,7 +88,7 @@ class ReservatieLijst:
         kostA=a.x1*a.P1 + a.x2*a.P2
         kostB=b.x1*b.P1 + b.x2*b.P2
         verschil= kostB-kostA
-        print 'vershil:', verschil
+        print( 'vershil:', verschil)
         return verschil
     
     def swap(self,a,b):# effectief swappen
@@ -101,91 +99,3 @@ class ReservatieLijst:
                 self.lijst[i]=b
                 return
             i+=1
-            
-reservationList=[]
-zonesList=[]
-carsList=[]
-
-with open('toy1.csv', mode='r') as csv_file:
-    csv_reader = csv.reader(csv_file , delimiter=";")
-    for row in csv_reader:
-        if row[0][0]=="r": #reservation
-            tempReservation=[]
-            for i in range(len(row)):
-                
-                if(i==5): #index of the auto's list in a row of reservations
-                    autos= row[i].split(',')
-                    tempReservation.append(autos)
-                else:
-                    tempReservation.append(row[i])
-            reservationList.append(tempReservation)
-        elif row[0][0] == "z": # zone
-            tempZone=[]
-            tempZone.append(row[0])
-            zones= row[1].split(',')
-            tempZone.append(zones)
-            zonesList.append(tempZone)
-        else: #car
-            carsList.append(row[0])
-
-i = 0
-for zone in zonesList: #read zone lines of csv 
-    z =  zone[0] #zoneID
-    Car.zoneIDtoStr[i] = z  
-    Car.zoneStrtoID[z] = i
-    i+=1
-   
-i = 0
-for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
-    AdjectentZone = zone[1] #replace by list in CSV file
-    #convert string IDs to numerical IDs
-    arr = []
-    for z in AdjectentZone:
-        arr.append(Car.zoneStrtoID[z])
-    Car.zoneIDtoADJ[i] = arr
-    i+=1
-    
-j = 0
-cars = []
-for car in carsList: #read car lines of csv 
-    cars.append(Car())
-    c = car #carID
-    Car.carIDtoStr[j] =  c
-    Car.carStrtoID[c] = j
-    j+=1
-    
-    
-k = 0
-Kost=ReservatieLijst()
-
-print(reservationList)
-for res in reservationList:
-    #Replace these variables by values in csv file
-    ID = res[0]
-    day = res[2]
-    startTime = res[3]
-    duration = res[4]
-    P1 = res[6]
-    P2 = res[7]
-    OptionalCars = res[5]
-    r = Reservation(day,startTime,duration,P1,P2,OptionalCars) 
-    Kost.voegtoe(r)
-    Reservation.resIDtoStr[k] = ID 
-    k+=1
-    
-Kost.bereken()
-Kost.comp(Kost.lijst[3],Kost.lijst[7])
-Kost.swap(Kost.lijst[3],Kost.lijst[7])
-    
-print('Reservations:')
-for r in Kost.lijst:
-    print('   ',r)
-print('Cars:')
-for c in cars:
-    print('   ',c)
-print('Dictionaries:')  
-print('   carIDtoStr',Car.carIDtoStr)
-print('   carStrtoID',Car.carStrtoID)
-print('   zoneIDtoStr',Car.zoneIDtoStr)
-print('   zoneStrtoID',Car.zoneStrtoID)
-print('   zoneIDtoADJ',Car.zoneIDtoADJ)
