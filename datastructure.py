@@ -4,9 +4,8 @@ class Reservation:
     def __init__(self,zone,day,start,duration,P1,P2,carOptions):
         self.id = Reservation.id
         Reservation.id += 1
-        self.carID = -1
         self.zone = zone
-        self.start = int(day)*1440+int(start) #○convert to minutes (24*60 minutes per day)
+        self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
         self.end = self.start + int(duration) #cast day, start, duration from txt to int
         
         self.P1 = P1  # cost for not assigning Reservation
@@ -17,6 +16,20 @@ class Reservation:
         
         self.options = carOptions #id of possible cars
         
+    def cost(self):
+        if(self.notAssigned):
+            return self.P1
+        if(self.adjZone):
+            return self.P2
+        return 0
+    def costNewZone(self,zone):
+        #How cost for this reservation improves if the new zone is assigned
+        if(self.zone==zone):
+            return self.cost()-0
+        elif(zone == -1):
+            return self.cost()-self.P1
+        else:
+            return self.cost()-self.P2
     
     def overlap(self,start,end):
         if(self.start<=start<=self.end):
@@ -47,12 +60,23 @@ class Car:
         self.zone = 0
         
     def overlap(self,start,end):
-
         for r in self.res:
             if(r.overlap(start,end)):
                 return True
         return False
-        
+    
+    def swap(self,c2,r):
+        #https://stackoverflow.com/questions/1835756/using-try-vs-if-in-python#:~:text=As%20far%20as%20the%20performance,than%20using%20if%20statement%20everytime.&text=As%20a%20general%20rule%20of,handling%20stuff%20to%20control%20flow.
+        #As far as the performance is concerned, using try block for code that normally doesn’t raise exceptions is faster than using if statement everytime.
+        try:
+            self.res.remove(r)
+            c2.res.append(r)
+            if(c2.zone==r.zone):
+                r.adjZone=0
+            else:
+                r.adjZone=1
+        except:
+            print("Error: swap failed")
 
     def __str__(self):
         s = str(self.id)+" "
@@ -64,11 +88,11 @@ class Car:
         s+=']'
         return s
     
-class Cost: #Was reservatieLijt
+class Cost:
     def getCost(lijst):#Kost berekenen
         cost=0
         for r in lijst:
-            cost+= r.notAssigned*r.P1 + r.adjZone*r.P2
+            cost += r.cost()
         print("cost:",cost)
         return cost
         
@@ -79,10 +103,3 @@ class Cost: #Was reservatieLijt
         print( 'vershil:', verschil)
         return verschil
     
-    def swap(self,a,b):# effectief swappen (dit swapt niet echt iets tho)
-        i=0
-        while i<self.l:
-            if self.lijst[i]==a:
-                self.lijst[i]=b
-                return
-            i+=1

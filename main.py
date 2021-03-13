@@ -7,7 +7,6 @@ def assignRes(c,r,adj):
     c.res.append(r)
     r.notAssigned = False 
     r.adjZone = adj
-    r.carID = c.id
 def tryAssign(c,r):
     if(not(c.overlap(r.start,r.end))):
         if(c.zone == r.zone):#car is in zone of r
@@ -25,7 +24,7 @@ def tryAssign(c,r):
     else:
         print("overlap",c.id)
         return False
-def initialSolution1(reservatieLijst,cars,Car):
+def initialSolution1(reservatieLijst,cars):
     for r in reservatieLijst:
         if(r.notAssigned):
             print(r)
@@ -42,6 +41,17 @@ def initialSolution1(reservatieLijst,cars,Car):
                         adj = False
                         assignRes(c,r,adj)
                         break
+def localSearch(reservatieLijst,cars):
+    #zoeken maximale verbetering:
+    #kijk eerst bij nog niet toegewezen reservaties
+    for r in reservatieLijst:
+        if(r.notAssigned):
+            pass
+        
+    #kijk naar adj toegewezen
+    for r in reservatieLijst:
+        if(r.adjZone):
+            pass
     
 def main():
     cars, reservatieLijst = readCSV(Car,Reservation,'toy1.csv')
@@ -59,7 +69,7 @@ def main():
     
     
     Cost.getCost(reservatieLijst)
-    initialSolution1(reservatieLijst,cars,Car)
+    initialSolution1(reservatieLijst,cars)
     Cost.getCost(reservatieLijst)
     print('Cars:')
     for c in cars:
@@ -68,6 +78,7 @@ def main():
     for r in reservatieLijst:
         print('   ',r)
         print('   ',r.notAssigned,r.adjZone)
-    
+
+    localSearch(reservatieLijst,cars)
 if __name__ == "__main__":
     main()
