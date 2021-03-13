@@ -55,16 +55,16 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         j+=1
         
     k = 0
-    print(reservationList)
     for res in reservationList:
         ID = res[0]
+        zone = Car.zoneStrtoID[res[1]]
         day = res[2]
         startTime = res[3]
         duration = res[4]
         P1 = int(res[6])
         P2 = int(res[7])
         OptionalCars = res[5]
-        r = Reservation(day,startTime,duration,P1,P2,OptionalCars)
+        r = Reservation(zone,day,startTime,duration,P1,P2,OptionalCars)
         reservatieLijst.append(r) 
         #Kost.voegtoe(r)
         Reservation.resIDtoStr[k] = ID
