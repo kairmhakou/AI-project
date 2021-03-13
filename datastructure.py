@@ -15,9 +15,8 @@ class Reservation:
         self.notAssigned = True #1 -> not assigned
         self.adjZone = False #1 -> assigned to adjecent zone
         
-        self.options = [] #id of possible cars
-        for c in carOptions:
-            self.options.append(Car.carStrtoID[c])
+        self.options = carOptions #id of possible cars
+        
     
     def overlap(self,start,end):
         if(self.start<=start<=self.end):

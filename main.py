@@ -17,12 +17,13 @@ def tryAssign(c,r):
             print("    assigned adjecent to car",c.id,'\n')
             adj=True
 
-        else:#cannot assign r to c without swapping
+        else:
+            print("    Swap needed",c.id)
             return False
         assignRes(c,r,adj)
         return True
     else:
-        print("overlap")
+        print("overlap",c.id)
         return False
 def initialSolution1(reservatieLijst,cars,Car):
     for r in reservatieLijst:
@@ -34,12 +35,13 @@ def initialSolution1(reservatieLijst,cars,Car):
                         break            
         if(r.notAssigned):#could not be assigned to any car
             for c in cars:
-                if(len(c.res)==0):#No other reservations so no problem
-                    print("    change zone of car",c.id,c.zone,'\n')
-                    c.zone = r.zone
-                    adj = False
-                    assignRes(c,r,adj)
-                    break
+                if(c.id in r.options):#car is a valid option for r
+                    if(len(c.res)==0):#No other reservations so no problem
+                        print("    change zone of car",c.id,c.zone,'\n')
+                        c.zone = r.zone
+                        adj = False
+                        assignRes(c,r,adj)
+                        break
     
 def main():
     cars, reservatieLijst = readCSV(Car,Reservation,'toy1.csv')

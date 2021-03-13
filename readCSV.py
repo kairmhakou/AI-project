@@ -40,10 +40,10 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
         AdjectentZone = zone[1] 
         #convert string IDs to numerical IDs
-        arr = []
+        IDset = set()
         for z in AdjectentZone:
-            arr.append(Car.zoneStrtoID[z])
-        Car.zoneIDtoADJ[i] = arr
+            IDset.add(Car.zoneStrtoID[z])
+        Car.zoneIDtoADJ[i] = IDset
         i+=1
         
     j = 0
@@ -63,7 +63,20 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         duration = res[4]
         P1 = int(res[6])
         P2 = int(res[7])
-        OptionalCars = res[5]
+        #What makes sets faster than lists? https://stackoverflow.com/questions/8929284/what-makes-sets-faster-than-lists
+
+        """
+        https://stackoverflow.com/questions/2831212/python-sets-vs-lists#:~:text=Sets%20are%20significantly%20faster%20when,is%20faster%20for%20your%20situation.
+        Sets are significantly faster when it comes to determining if an object is present in the set 
+        (as in x in s ), 
+        but are slower than lists when it comes to iterating over their contents.
+        
+        """
+        optionSet = []
+    
+        for o in res[5]:
+            optionSet.append(Car.carStrtoID[o])
+        OptionalCars = optionSet
         r = Reservation(zone,day,startTime,duration,P1,P2,OptionalCars)
         reservatieLijst.append(r) 
         #Kost.voegtoe(r)
