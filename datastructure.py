@@ -4,6 +4,7 @@ class Reservation:
     def __init__(self,zone,day,start,duration,P1,P2,carOptions):
         self.id = Reservation.id
         Reservation.id += 1
+        self.car = None
         self.zone = zone
         self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
         self.end = self.start + int(duration) #cast day, start, duration from txt to int
@@ -36,6 +37,8 @@ class Reservation:
             return True
         if(self.start<=end<=self.end):
             return True
+        if(start<=self.start<=end):
+            return True
         return False
     def __str__(self):
         s = str(self.id)+ " "
@@ -43,7 +46,13 @@ class Reservation:
         s+=", zone: "+str(self.zone)
         s+= ", P1/P2: "+str(self.P1)+'/'+str(self.P2)
         s+= ", start/end: "+str(self.start)+'/'+str(self.end)
-        s+= ", CarOptions: "+ str(self.options)
+      
+        s += " / CarOptions: ["
+        for c in self.options:
+            s+=str(c.id)+','
+        s+=']'
+        if(self.car):
+            s+=str(self.car.id)
         return s
 class Car:
     id = 0
@@ -51,7 +60,7 @@ class Car:
     carStrtoID = {}
     zoneIDtoStr = {}
     zoneStrtoID = {}
-    zoneIDtoADJ = {}
+    zoneIDtoADJ = []
     def __init__(self):
         self.id = Car.id
         Car.id += 1
@@ -78,6 +87,61 @@ class Car:
         except:
             print("Error: swap failed")
 
+
+    def costToAddr(self,nres):
+        cost = nres.cost()-(self.zone!=nres.zone)*nres.P2
+        if(nres.id==7):
+            print("add:",nres.id,'to car',self.id,cost,end =",")
+        for r in self.res:
+            if(nres.id==7):
+                print(nres.id,r.id)
+                print(nres.start,nres.end,r.start,r.end)
+            if(nres.overlap(r.start,r.end)):
+                #overlap => r zou moeten worden verwijderd
+                cost -= (r.P1-r.cost())
+        if(nres.id==7):
+            print("->",cost)
+        return cost
+    def add(self,nres):
+        i = 0
+        while(i<len(self.res)):
+            r = self.res[i]
+            if(nres.overlap(r.start,r.end)):
+                tempr = self.res.pop(i)
+                print("removed:",tempr.id)
+                tempr.car = None
+                tempr.notAssigned = True
+                tempr.adjZone =False
+                i-=1
+            i+=1
+        nres.car = self
+        nres.notAssigned = False
+        nres.adjZone = nres.zone!=self.zone
+        self.res.append(nres)
+    
+    def costToSetZ(self,zone):
+        cost = 0
+        for r in self.res:
+            cost += r.costNewZone(zone)
+        return cost
+    def setZone(self,zone):
+        self.zone= zone
+        i = 0
+        while(i<len(self.res)):
+            r = self.res[i]
+            if(r.zone == zone):
+                r.adjZone = False
+            elif(r.zone in Car.zoneIDtoADJ[zone]):
+                r.adjZone = True
+            else:
+                #DIT GAAT MOGELIJKS FOUT
+                r.adjZone = False
+                r.notAssigned = True
+                r.car = None
+                self.res.pop(i)
+                i-=1
+            i+=1
+                
     def __str__(self):
         s = str(self.id)+" "
         s +=  Car.carIDtoStr[self.id]

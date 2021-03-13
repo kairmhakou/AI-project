@@ -43,7 +43,8 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         IDset = set()
         for z in AdjectentZone:
             IDset.add(Car.zoneStrtoID[z])
-        Car.zoneIDtoADJ[i] = IDset
+        Car.zoneIDtoADJ.append(IDset)
+        print(Car.zoneIDtoADJ)
         i+=1
         
     j = 0
@@ -75,7 +76,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         optionSet = []
     
         for o in res[5]:
-            optionSet.append(Car.carStrtoID[o])
+            optionSet.append(cars[Car.carStrtoID[o]])
         OptionalCars = optionSet
         r = Reservation(zone,day,startTime,duration,P1,P2,OptionalCars)
         reservatieLijst.append(r) 
