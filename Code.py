@@ -6,8 +6,7 @@ Created on Sun Mar 14 14:03:22 2021
 """
 
 class Code:
-    lenMemory = 100
-    passedCodes = [0]*lenMemory
+    passedCodes = []
     
     position = 0
     def formCode(rlist,cars,cost=0):
@@ -19,11 +18,10 @@ class Code:
             ccode.append(c.code())
         return [rcode,ccode,cost]
     def add(ncode):
-        Code.passedCodes[Code.position] = ncode
-        Code.position = (Code.position+1)%Code.lenMemory
+        Code.passedCodes.append(ncode)
     def setMemory(code):
-        for i in range(Code.lenMemory):
-            Code.passedCodes[i]= code
+        
+        Code.passedCodes.append(code)
         
     def inMemory(code):        
         for cd in Code.passedCodes:

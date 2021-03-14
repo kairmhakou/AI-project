@@ -6,6 +6,9 @@ from Reservation import Reservation
 from Cost import Cost
 from Code import Code
 
+def handler(signum, frame):
+    print("Times up! Exiting...")
+    exit(0)
 def assignRes(c,r,adj):
     c.res.append(r)
     r.notAssigned = False 
@@ -167,11 +170,13 @@ def main():
     
     initialSolution1(reservatieLijst,cars)
     
-
+    
     printResult(reservatieLijst,cars)
     print("----------------"*2)
     print("\nreservatieLijes->carID, cars->zoneID")
-    for i in range(100):
+    for i in range(10000):
+        if(i%100==0):
+            print(i,bestCost,len(Code.passedCodes))
         changed = localSearch(reservatieLijst,cars)
         if(not(changed)):
             cost = Cost.getCost(reservatieLijst)
@@ -188,7 +193,7 @@ def main():
             code = Code.formCode(reservatieLijst,cars,cost)
             Code.add(code)
         code = Code.formCode(reservatieLijst,cars)
-        print(code)
+        #print(code)
         cost = Cost.getCost(reservatieLijst)
     
     cost = Cost.getCost(reservatieLijst)
@@ -202,6 +207,7 @@ def main():
     printResult(reservatieLijst,cars)
     for cd in Code.passedCodes:
         pass#print(cd)
+    print("bestc:",bestCost)
 
   
 if __name__ == "__main__":
