@@ -5,7 +5,7 @@ from Car import Car
 from Reservation import Reservation
 from Cost import Cost
 from Code import Code
-
+import time
 def handler(signum, frame):
     print("Times up! Exiting...")
     exit(0)
@@ -49,43 +49,45 @@ def initialSolution1(reservatieLijst,cars):
                     
 
 def localSearch(rlist,cars):
-    best = 0 #verbetering >0
-    bestc = None
-    bestz = None
-    bestr = None
-    
-    #All possible 'assigned car' swaps
-    for r in rlist:
-        for c in r.options:
-            if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
-                cost =  c.costToAddr(r)
+    count = 0
+    while(1):
+        count += 1
+        best = 0 #verbetering >0
+        bestc = None
+        bestz = None
+        bestr = None
+        
+        #All possible 'assigned car' swaps
+        for r in rlist:
+            for c in r.options:
+                if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
+                    cost =  c.costToAddr(r)
+                    if(cost>best):
+                        best = cost
+                        bestc = c
+                        bestr = r
+                        #print(bestc.id,best,bestr)
+        
+        #All sensible 'car zone' swaps
+        for c in cars:
+            for r in c.res:
+                cost =  c.costToSetZ(r.zone)
+                #print("zoneCost:",cost)
                 if(cost>best):
                     best = cost
                     bestc = c
-                    bestr = r
-                    #print(bestc.id,best,bestr)
-    
-    #All sensible 'car zone' swaps
-    for c in cars:
-        for r in c.res:
-            cost =  c.costToSetZ(r.zone)
-            #print("zoneCost:",cost)
-            if(cost>best):
-                best = cost
-                bestc = c
-                bestz = r.zone
-                #print(bestc.id,best,bestz)
-    if(bestz):
-        bestc.setZone(bestz)
-    elif(bestr):
-        if(bestr.car):#if currently assigned to a car, remove from list
-            bestr.car.res.remove(bestr)
-        #assign to new car
-        bestc.addr(bestr)
-    else:
-        return 0
-    return 1
-    
+                    bestz = r.zone
+                    #print(bestc.id,best,bestz)
+        if(bestz is not None):
+            bestc.setZone(bestz)
+        elif(bestr is not None):
+            if(bestr.car):#if currently assigned to a car, remove from list
+                bestr.car.res.remove(bestr)
+            #assign to new car
+            bestc.addr(bestr)
+        else:
+            return count
+   
 def forceAssign(rlist,cars):
     minL = 99999999999 
     bestc = None
@@ -160,25 +162,24 @@ def main():
     print('   zoneIDtoADJ',Car.zoneIDtoADJ)
     print('\n'*2)
     
-    maxC = 999999999
-    bestCost=maxC
-
     cost = Cost.getCost(reservatieLijst)
     code = Code.formCode(reservatieLijst,cars,cost)
-    Code.setMemory(code)
+    Code.add(code)
     
     
     initialSolution1(reservatieLijst,cars)
-    
+    initialCost = Cost.getCost(reservatieLijst)
+    bestCost = initialCost
     
     printResult(reservatieLijst,cars)
     print("----------------"*2)
-    print("\nreservatieLijes->carID, cars->zoneID")
+    print("\ni,bestcost,swaps")
     for i in range(10000):
+        count = localSearch(reservatieLijst,cars)
         if(i%100==0):
-            print(i,bestCost,len(Code.passedCodes))
-        changed = localSearch(reservatieLijst,cars)
-        if(not(changed)):
+            print(i,bestCost,count)
+        
+        if(not(0)):
             cost = Cost.getCost(reservatieLijst)
             if(cost<bestCost):
                 writeCSV(cost,Car,cars,reservatieLijst,f)
@@ -186,7 +187,6 @@ def main():
                 Code.add(code)
                 bestCost = cost
             changed = forceAssign(reservatieLijst,cars)
-            
             if(not(changed)):
                 print("No more changes after:",i)
                 break
@@ -205,10 +205,12 @@ def main():
     print("bestc:",bestCost)
     print("----------------"*2)
     printResult(reservatieLijst,cars)
-    for cd in Code.passedCodes:
+    for cd in Code.passedCodesPerL:
         pass#print(cd)
     print("bestc:",bestCost)
 
   
 if __name__ == "__main__":
+    start_time = time.perf_counter()
     main()
+    print("--- %s seconds ---" % (time.perf_counter() - start_time))
