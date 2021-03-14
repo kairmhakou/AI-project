@@ -28,6 +28,7 @@ req3
 """
 import csv
 def writeCSV(cost,Car,cars,rlist):
+    #input("writingResult")
     with open('solution.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -46,4 +47,4 @@ def writeCSV(cost,Car,cars,rlist):
         writer.writerow(['+Unassigned', 'requests'])
         for r in rlist:
             if(r.notAssigned):
-                writer.writerow(["req"+str(r.id)] + [Car.carIDtoStr[r.car.id]])
+                writer.writerow(["req"+str(r.id)])

@@ -1,8 +1,8 @@
 from readCSV import readCSV
 from writeCSV import writeCSV
-from datastructure import Car
-from datastructure import Reservation
-from datastructure import Cost
+from Car import Car
+from Reservation import Reservation
+from Cost import Cost
         
 def assignRes(c,r,adj):
     c.res.append(r)
@@ -97,8 +97,7 @@ def forceAssign(rlist,cars):
         bestc.add(bestr)
         
                     
-def printResult(Cost,rlist,cars):
-    Cost.getCost(rlist)
+def printResult(rlist,cars):
     print('Cars:')
     for c in cars:
         print('   ',c)
@@ -124,15 +123,20 @@ def main():
     Cost.getCost(reservatieLijst)
     #initialSolution1(reservatieLijst,cars)
     
-    printResult(Cost,reservatieLijst,cars)
+    printResult(reservatieLijst,cars)
 
-    
+    bestCost=9999999
     for i in range(20):
         changed = localSearch(reservatieLijst,cars)
         if(not(changed)):
+            cost = Cost.getCost(reservatieLijst)
+            if(cost<bestCost):
+                writeCSV(cost,Car,cars,reservatieLijst)
+                bestCost = cost
             forceAssign(reservatieLijst,cars)
-        printResult(Cost,reservatieLijst,cars)
-        #•input() 
+        printResult(reservatieLijst,cars)
+        cost = Cost.getCost(reservatieLijst)
+        #input("Continue") 
     
     cost = Cost.getCost(reservatieLijst)
     writeCSV(cost,Car,cars,reservatieLijst)

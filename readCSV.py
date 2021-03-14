@@ -46,7 +46,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         Car.zoneIDtoADJ.append(IDset)
         print(Car.zoneIDtoADJ)
         i+=1
-        
+    Reservation.zoneIDtoADJ = Car.zoneIDtoADJ
     j = 0
     for car in carsList: #read car lines of csv 
         cars.append(Car())

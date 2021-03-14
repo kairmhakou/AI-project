@@ -1,6 +1,7 @@
 class Reservation:
     id = 0
     resIDtoStr = {}
+    zoneIDtoADJ = {}
     def __init__(self,zone,day,start,duration,P1,P2,carOptions):
         self.id = Reservation.id
         Reservation.id += 1
@@ -24,13 +25,13 @@ class Reservation:
             return self.P2
         return 0
     def costNewZone(self,zone):
-        #How cost for this reservation improves if the new zone is assigned
+        #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):
             return self.cost()-0
-        elif(zone == -1):
-            return self.cost()-self.P1
-        else:
+        elif(self.zone in Reservation.zoneIDtoADJ[zone]):
             return self.cost()-self.P2
+        else:
+            return self.cost()-self.P1
     
     def overlap(self,start,end):
         if(self.start<=start<=self.end):
@@ -55,19 +56,3 @@ class Reservation:
             s+=str(self.car.id)
         return s
 
-    
-class Cost:
-    def getCost(lijst):#Kost berekenen
-        cost=0
-        for r in lijst:
-            cost += r.cost()
-        print("cost:",cost)
-        return cost
-        
-    def comp(a,b):#kijken wat het verschil zou zijn voor een swap
-        kostA=a.notAssigned*a.P1 + a.adjZone*a.P2
-        kostB=b.notAssigned*b.P1 + b.adjZone*b.P2
-        verschil= kostB-kostA
-        print( 'vershil:', verschil)
-        return verschil
-    
