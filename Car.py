@@ -41,17 +41,15 @@ class Car:
 
     def costToAddr(self,nres):
         cost = nres.cost()-(self.zone!=nres.zone)*nres.P2
-        if(nres.id==7):
-            print("add:",nres.id,'to car',self.id,cost,end =",")
+ 
+        #print("add:",nres.id,'to car',self.id,cost,end =",")
         for r in self.res:
-            if(nres.id==7):
-                print(nres.id,r.id)
-                print(nres.start,nres.end,r.start,r.end)
+            #print(nres.id,r.id)
+            #print(nres.start,nres.end,r.start,r.end)
             if(nres.overlap(r.start,r.end)):
                 #overlap => r zou moeten worden verwijderd
                 cost -= (r.P1-r.cost())
-        if(nres.id==7):
-            print("->",cost)
+        #print("->",cost)
         return cost
     def addr(self,nres):
         i = 0
@@ -59,7 +57,7 @@ class Car:
             r = self.res[i]
             if(nres.overlap(r.start,r.end)):
                 tempr = self.res.pop(i)
-                print("removed:",tempr.id)
+                #print("removed:",tempr.id)
                 tempr.car = None
                 tempr.notAssigned = True
                 tempr.adjZone =False
@@ -92,7 +90,34 @@ class Car:
                 self.res.pop(i)
                 i-=1
             i+=1
-                
+            
+    def changeCode(self,bestr,code):  
+        zone = bestr.zone
+        code[0][bestr.id] = self.id
+        code[1][self.id] = zone
+        i = 0
+        while(i<len(self.res)):
+            r = self.res[i]
+
+            if(r.zone == zone):
+                pass #was adj is now ==zone => no code change
+            elif(r.zone in Car.zoneIDtoADJ[zone]):
+                pass #was ==zone now adj => no code change
+            else:
+                code[0][r.id] = 'x' #r now no longer assigned
+            i+=1
+        
+        nres = bestr
+        i = 0
+        while(i<len(self.res)):
+            r = self.res[i]
+            if(nres.overlap(r.start,r.end)):
+                code[0][r.id] = 'x'
+            i+=1
+        return code
+    
+    def code(self):
+        return self.zone
     def __str__(self):
         s = str(self.id)+" "
         s +=  Car.carIDtoStr[self.id]

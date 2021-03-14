@@ -34,23 +34,17 @@ def writeCSV(cost,Car,cars,rlist,f):
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         
         writer.writerow([str(cost)])
-        print(str(cost))
         writer.writerow(['+Vehicle', 'assignments'])
-        print('+Vehicle', 'assignments')
         for c in cars:
             writer.writerow([Car.carIDtoStr[c.id]] + [Car.zoneIDtoStr[c.zone]])
-            print([Car.carIDtoStr[c.id]] + [Car.zoneIDtoStr[c.zone]])
         writer.writerow(['+Assigned', 'requests'])
-        print('+Assigned', 'requests')
         for r in rlist:
             if(not(r.notAssigned)):
                 writer.writerow(["req"+str(r.id)] + [Car.carIDtoStr[r.car.id]])
                 
         writer.writerow(['+Unassigned', 'requests'])
-        print('+Unassigned', 'requests')
         for r in rlist:
             if(r.notAssigned):
                 writer.writerow(["req"+str(r.id)])
-                print("req"+str(r.id))
         
     #input("writingResult")

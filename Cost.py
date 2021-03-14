@@ -10,7 +10,6 @@ class Cost:
         cost=0
         for r in lijst:
             cost += r.cost()
-        print("cost:",cost)
         return cost
         
     def comp(a,b):#kijken wat het verschil zou zijn voor een swap

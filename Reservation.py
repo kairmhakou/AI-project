@@ -41,6 +41,10 @@ class Reservation:
         if(start<=self.start<=end):
             return True
         return False
+    def code(self):
+        if(self.car == None):
+            return 'x'
+        return self.car.id
     def __str__(self):
         s = str(self.id)+ " "
         s += Reservation.resIDtoStr[self.id]

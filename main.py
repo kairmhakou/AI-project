@@ -4,7 +4,8 @@ from writeCSV import writeCSV
 from Car import Car
 from Reservation import Reservation
 from Cost import Cost
-        
+from Code import Code
+
 def assignRes(c,r,adj):
     c.res.append(r)
     r.notAssigned = False 
@@ -13,31 +14,31 @@ def assignRes(c,r,adj):
 def tryAssign(c,r):
     if(not(c.overlap(r.start,r.end))):
         if(c.zone == r.zone):#car is in zone of r
-            print("    assigned to car:",c.id,'\n')
+            #print("    assigned to car:",c.id,'\n')
             adj = False
         elif(c.zone in Car.zoneIDtoADJ[r.zone]):
-            print("    assigned adjecent to car",c.id,'\n')
+            #print("    assigned adjecent to car",c.id,'\n')
             adj=True
 
         else:
-            print("    Swap needed",c.id)
+            #print("    Swap needed",c.id)
             return False
         assignRes(c,r,adj)
         return True
     else:
-        print("overlap",c.id)
+        #print("overlap",c.id)
         return False
 def initialSolution1(reservatieLijst,cars):
     for r in reservatieLijst:
         if(r.notAssigned):
-            print(r)
+            #print(r)
             for c in r.options:
                     if(tryAssign(c,r)):
                         break            
         if(r.notAssigned):#could not be assigned to any car
             for c in r.options:
                     if(len(c.res)==0):#No other reservations so no problem
-                        print("    change zone of car",c.id,c.zone,'\n')
+                        #print("    change zone of car",c.id,c.zone,'\n')
                         c.zone = r.zone
                         adj = False
                         assignRes(c,r,adj)
@@ -86,16 +87,36 @@ def forceAssign(rlist,cars):
     minL = 99999999999 
     bestc = None
     bestr = None
+    nextcode = Code.formCode(rlist,cars)
     for r in rlist:
-        print(r)
+        #print(r)
         if(r.notAssigned):
             for c in r.options:
+                
                 if(len(c.res)<minL):
+                    """
+                    NIET AANPASSEN 
+                    ga voor problemen zorgen
+                    """
+                    nextcode = Code.formCode(rlist,cars)
+                    nextcode = c.changeCode(r,nextcode)
+                    if(Code.inMemory(nextcode)):
+                        #print("was in memory")
+                        continue
+                    """
+                    NIET AANPASSEN
+                    """
                     minL = len(c.res)
                     bestc = c
                     bestr = r
     if(bestr):
-        print("forceAssign",bestr.id,bestc.id)
+        
+        nextcode = Code.formCode(rlist,cars)
+        nextcode = bestc.changeCode(bestr,nextcode)
+        if(Code.inMemory(nextcode)):
+            input("was in memory HOW")
+    
+        #print("forceAssign",bestr.id,bestc.id)
         bestc.setZone(bestr.zone)
         bestc.addr(bestr)
         return 1
@@ -121,7 +142,7 @@ def main():
         filenames.append(file.split('.')[0])
         print(i,":",filenames[i])
         i+=1
-    fnr = int(input("choose file nr: "))
+    fnr = int(input("Choose file nr: "))
     f = filenames[fnr]
     cars, reservatieLijst = readCSV(Car,Reservation,'./csv/'+f+'.csv')
     print('Cars:')
@@ -136,33 +157,52 @@ def main():
     print('   zoneIDtoADJ',Car.zoneIDtoADJ)
     print('\n'*2)
     
-    
-    Cost.getCost(reservatieLijst)
-    #initialSolution1(reservatieLijst,cars)
-    
-    printResult(reservatieLijst,cars)
-
     maxC = 999999999
     bestCost=maxC
+
+    cost = Cost.getCost(reservatieLijst)
+    code = Code.formCode(reservatieLijst,cars,cost)
+    Code.setMemory(code)
+    
+    
+    initialSolution1(reservatieLijst,cars)
+    
+
+    printResult(reservatieLijst,cars)
+    print("----------------"*2)
+    print("\nreservatieLijes->carID, cars->zoneID")
     for i in range(100):
         changed = localSearch(reservatieLijst,cars)
         if(not(changed)):
             cost = Cost.getCost(reservatieLijst)
             if(cost<bestCost):
                 writeCSV(cost,Car,cars,reservatieLijst,f)
+                code = Code.formCode(reservatieLijst,cars,cost)
+                Code.add(code)
                 bestCost = cost
             changed = forceAssign(reservatieLijst,cars)
+            
             if(not(changed)):
                 print("No more changes after:",i)
                 break
-        printResult(reservatieLijst,cars)
+            code = Code.formCode(reservatieLijst,cars,cost)
+            Code.add(code)
+        code = Code.formCode(reservatieLijst,cars)
+        print(code)
         cost = Cost.getCost(reservatieLijst)
-        #input("Continue") 
     
     cost = Cost.getCost(reservatieLijst)
-    if(bestCost==maxC):
-        print("never reached peak")
+    if(cost<bestCost):
         writeCSV(cost,Car,cars,reservatieLijst,f)
+        code = Code.formCode(reservatieLijst,cars,cost)
+        Code.add(code)
+        bestCost = cost
     print("bestc:",bestCost)
+    print("----------------"*2)
+    printResult(reservatieLijst,cars)
+    for cd in Code.passedCodes:
+        pass#print(cd)
+
+  
 if __name__ == "__main__":
     main()
