@@ -1,3 +1,4 @@
+import glob
 from readCSV import readCSV
 from writeCSV import writeCSV
 from Car import Car
@@ -52,29 +53,31 @@ def localSearch(rlist,cars):
     #All possible 'assigned car' swaps
     for r in rlist:
         for c in r.options:
-            cost =  c.costToAddr(r)
-            if(cost>best):
-                best = cost
-                bestc = c
-                bestr = r
-                print(bestc.id,best,bestr)
+            if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
+                cost =  c.costToAddr(r)
+                if(cost>best):
+                    best = cost
+                    bestc = c
+                    bestr = r
+                    #print(bestc.id,best,bestr)
     
     #All sensible 'car zone' swaps
     for c in cars:
         for r in c.res:
             cost =  c.costToSetZ(r.zone)
-            print("zoneCost:",cost)
+            #print("zoneCost:",cost)
             if(cost>best):
                 best = cost
                 bestc = c
                 bestz = r.zone
-                print(bestc.id,best,bestz)
+                #print(bestc.id,best,bestz)
     if(bestz):
         bestc.setZone(bestz)
     elif(bestr):
-        if(bestr.car):
+        if(bestr.car):#if currently assigned to a car, remove from list
             bestr.car.res.remove(bestr)
-        bestc.add(bestr)
+        #assign to new car
+        bestc.addr(bestr)
     else:
         return 0
     return 1
@@ -94,8 +97,11 @@ def forceAssign(rlist,cars):
     if(bestr):
         print("forceAssign",bestr.id,bestc.id)
         bestc.setZone(bestr.zone)
-        bestc.add(bestr)
-        
+        bestc.addr(bestr)
+        return 1
+    else:
+        print("No Forced assign")
+        return 0
                     
 def printResult(rlist,cars):
     print('Cars:')
@@ -106,7 +112,18 @@ def printResult(rlist,cars):
         print('   ',r)
         print('   ',r.notAssigned,r.adjZone)
 def main():
-    cars, reservatieLijst = readCSV(Car,Reservation,'toy1.csv')
+    arr = glob.glob(".\csv\*.csv")
+    print('options:')
+    i = 0
+    filenames = []
+    for f in arr:
+        file = f.split('\\')[-1]
+        filenames.append(file.split('.')[0])
+        print(i,":",filenames[i])
+        i+=1
+    fnr = int(input("choose file nr: "))
+    f = filenames[fnr]
+    cars, reservatieLijst = readCSV(Car,Reservation,'./csv/'+f+'.csv')
     print('Cars:')
     for c in cars:
         print('   ',c)
@@ -125,20 +142,27 @@ def main():
     
     printResult(reservatieLijst,cars)
 
-    bestCost=9999999
-    for i in range(20):
+    maxC = 999999999
+    bestCost=maxC
+    for i in range(100):
         changed = localSearch(reservatieLijst,cars)
         if(not(changed)):
             cost = Cost.getCost(reservatieLijst)
             if(cost<bestCost):
-                writeCSV(cost,Car,cars,reservatieLijst)
+                writeCSV(cost,Car,cars,reservatieLijst,f)
                 bestCost = cost
-            forceAssign(reservatieLijst,cars)
+            changed = forceAssign(reservatieLijst,cars)
+            if(not(changed)):
+                print("No more changes after:",i)
+                break
         printResult(reservatieLijst,cars)
         cost = Cost.getCost(reservatieLijst)
         #input("Continue") 
     
     cost = Cost.getCost(reservatieLijst)
-    writeCSV(cost,Car,cars,reservatieLijst)
+    if(bestCost==maxC):
+        print("never reached peak")
+        writeCSV(cost,Car,cars,reservatieLijst,f)
+    print("bestc:",bestCost)
 if __name__ == "__main__":
     main()

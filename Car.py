@@ -53,7 +53,7 @@ class Car:
         if(nres.id==7):
             print("->",cost)
         return cost
-    def add(self,nres):
+    def addr(self,nres):
         i = 0
         while(i<len(self.res)):
             r = self.res[i]
