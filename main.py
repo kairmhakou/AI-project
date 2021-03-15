@@ -209,6 +209,19 @@ def main():
             print('~~timeisup~~')
             print(f)
             writeCSV(bestCost,Car,cars,reservatieLijst,f)
+            print(len(reservatieLijst),len(cars)
+            # 5,3
+            # rrrrrccc
+            # r -> r.Car.id
+            # c -> c.zone (zone id)
+            """
+            for r in reservatieLijst:
+                r.car = int(code[r.id])
+            for c in cars:
+                r.zone = int(code[len(reservatieLijst)+c.id])
+            """
+            
+        
             print("bestc:",bestCost)
             return
         code = Code.formCode(reservatieLijst,cars)
