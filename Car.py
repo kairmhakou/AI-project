@@ -19,42 +19,25 @@ class Car:
         self.res = [] #list of reservations assigned to this car
         self.zone = 0
         
+    def inZone(self,r):
+        if(self.zone == r.zone):
+            return 1
+        elif(self.zone in Car.zoneIDtoADJ[r.zone]):
+            return 2
+        else:
+            return 0
     def overlap(self,start,end):
         for r in self.res:
             if(r.overlap(start,end)):
                 return True
         return False
     
-    def swap(self,c2,r):
-        #https://stackoverflow.com/questions/1835756/using-try-vs-if-in-python#:~:text=As%20far%20as%20the%20performance,than%20using%20if%20statement%20everytime.&text=As%20a%20general%20rule%20of,handling%20stuff%20to%20control%20flow.
-        #As far as the performance is concerned, using try block for code that normally doesn’t raise exceptions is faster than using if statement everytime.
-        try:
-            self.res.remove(r)
-            c2.res.append(r)
-            if(c2.zone==r.zone):
-                r.adjZone=0
-            else:
-                r.adjZone=1
-        except:
-            print("Error: swap failed")
 
-
-    def costToAddr(self,nres):
-        cost = nres.cost()-(self.zone!=nres.zone)*nres.P2
- 
-        #print("add:",nres.id,'to car',self.id,cost,end =",")
-        for r in self.res:
-            #print(nres.id,r.id)
-            #print(nres.start,nres.end,r.start,r.end)
-            if(nres.overlap(r.start,r.end)):
-                #overlap => r zou moeten worden verwijderd
-                cost -= (r.P1-r.cost())
-        #print("->",cost)
-        return cost
-    def addr(self,nres):
+    def addR(self,nres):
         i = 0
         while(i<len(self.res)):
             r = self.res[i]
+            #remove all res that overlap with nres
             if(nres.overlap(r.start,r.end)):
                 tempr = self.res.pop(i)
                 #print("removed:",tempr.id)
@@ -68,11 +51,6 @@ class Car:
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres)
     
-    def costToSetZ(self,zone):
-        cost = 0
-        for r in self.res:
-            cost += r.costNewZone(zone)
-        return cost
     def setZone(self,zone):
         self.zone= zone
         i = 0
@@ -91,6 +69,9 @@ class Car:
                 i-=1
             i+=1
             
+    """
+    Nergens anders gebruiken
+    """
     def changeCode(self,bestr,code):  
         zone = bestr.zone
         code[0][bestr.id] = self.id

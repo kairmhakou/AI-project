@@ -24,6 +24,7 @@ class Reservation:
         if(self.adjZone):
             return self.P2
         return 0
+    
     def costNewZone(self,zone):
         #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):
@@ -41,10 +42,12 @@ class Reservation:
         if(start<=self.start<=end):
             return True
         return False
+    
     def code(self):
         if(self.car == None):
             return 'x'
         return self.car.id
+    
     def __str__(self):
         s = str(self.id)+ " "
         s += Reservation.resIDtoStr[self.id]
@@ -60,3 +63,5 @@ class Reservation:
             s+=str(self.car.id)
         return s
 
+if __name__ == "__main__":
+    pass

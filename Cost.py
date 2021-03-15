@@ -10,12 +10,22 @@ class Cost:
         cost=0
         for r in lijst:
             cost += r.cost()
-        return cost
-        
-    def comp(a,b):#kijken wat het verschil zou zijn voor een swap
-        kostA=a.notAssigned*a.P1 + a.adjZone*a.P2
-        kostB=b.notAssigned*b.P1 + b.adjZone*b.P2
-        verschil= kostB-kostA
-        print( 'vershil:', verschil)
-        return verschil
+        return cost    
     
+    def costToSetZone(c,zone):
+        cost = 0
+        for r in c.res:
+            cost += r.costNewZone(zone)
+        return cost
+    
+    def costToAddR(c,nres):
+        cost = nres.cost()-(c.zone!=nres.zone)*nres.P2
+        for r in c.res:
+            if(nres.overlap(r.start,r.end)):
+                #overlap => r zou moeten worden verwijderd
+                cost -= (r.P1-r.cost())
+        return cost
+    
+    
+if __name__ == "__main__":
+    pass

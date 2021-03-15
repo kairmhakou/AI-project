@@ -6,6 +6,7 @@ import threading
 from Reservation import Reservation
 from Cost import Cost
 from Code import Code
+from Printer import Printer
 import copy
 import time
 def handler(signum, frame):
@@ -35,9 +36,10 @@ def tryAssign(c,r):
 def initialSolution1(reservatieLijst,cars):
     for r in reservatieLijst:
         if(r.notAssigned):
-            #print(r)
             for c in r.options:
                     if(tryAssign(c,r)):
+                    if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
+                        c.addR(r)
                         break            
         if(r.notAssigned):#could not be assigned to any car
             for c in r.options:
@@ -46,10 +48,13 @@ def initialSolution1(reservatieLijst,cars):
                         c.zone = r.zone
                         adj = False
                         assignRes(c,r,adj)
+                        c.setZone(r.zone)
+                        c.addR(r)
                         break
                     
 
 def localSearch(rlist,cars):
+def localSearch(rlist,cars,Cost):
     count = 0
     while(1):
         count += 1
@@ -63,6 +68,7 @@ def localSearch(rlist,cars):
             for c in r.options:
                 if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
                     cost =  c.costToAddr(r)
+                    cost =  Cost.costToAddR(c,r)
                     if(cost>best):
                         best = cost
                         bestc = c
@@ -73,6 +79,7 @@ def localSearch(rlist,cars):
         for c in cars:
             for r in c.res:
                 cost =  c.costToSetZ(r.zone)
+                cost =  Cost.costToSetZone(c,r.zone)
                 #print("zoneCost:",cost)
                 if(cost>best):
                     best = cost
@@ -86,6 +93,7 @@ def localSearch(rlist,cars):
                 bestr.car.res.remove(bestr)
             #assign to new car
             bestc.addr(bestr)
+            bestc.addR(bestr)
         else:
             return count
    
@@ -95,10 +103,8 @@ def forceAssign(rlist,cars):
     bestr = None
     nextcode = Code.formCode(rlist,cars)
     for r in rlist:
-        #print(r)
         if(r.notAssigned):
             for c in r.options:
-                
                 if(len(c.res)<minL):
                     """
                     NIET AANPASSEN 
@@ -107,7 +113,6 @@ def forceAssign(rlist,cars):
                     nextcode = Code.formCode(rlist,cars)
                     nextcode = c.changeCode(r,nextcode)
                     if(Code.inMemory(nextcode)):
-                        #print("was in memory")
                         continue
                     """
                     NIET AANPASSEN
@@ -116,35 +121,80 @@ def forceAssign(rlist,cars):
                     bestc = c
                     bestr = r
     if(bestr):
-        
         nextcode = Code.formCode(rlist,cars)
         nextcode = bestc.changeCode(bestr,nextcode)
         if(Code.inMemory(nextcode)):
             input("was in memory HOW")
     
-        #print("forceAssign",bestr.id,bestc.id)
+            
         bestc.setZone(bestr.zone)
         bestc.addr(bestr)
+        bestc.addR(bestr)
         return 1
     else:
         print("No Forced assign")
         return 0
                     
-def printResult(rlist,cars):
-    print('Cars:')
-    for c in cars:
-        print('   ',c)
-    print('Reservations:')
-    for r in rlist:
-        print('   ',r)
-        print('   ',r.notAssigned,r.adjZone)
+    
+def main(f):
+    cars, reservatieLijst = readCSV(Car,Reservation,'./csv/'+f+'.csv')
 
-def alarmHandler(code):
-    print('--alarm--') 
-    print(code[2])
-    return
+    Printer.printDict(Car)
+    #base state of solution
+    cost = Cost.getCost(reservatieLijst)
+    code = Code.formCode(reservatieLijst,cars,cost)
+    Code.add(code)
+    
 
-def main():
+    initialSolution1(reservatieLijst,cars)
+    initialCost = Cost.getCost(reservatieLijst)
+    
+    #initialise best solution
+    bestCost = initialCost
+    bestcars=None
+    bestreservatieLijst=None
+    Printer.printResult(reservatieLijst,cars)
+    bestcars = copy.deepcopy(cars)
+    bestreservatieLijst =copy.deepcopy(reservatieLijst)
+    
+    print("----------------"*2)
+    print("\ni,bestcost,swaps")
+    i = 0
+    while(1):
+        if((time.perf_counter() - start_time)>300):   #set  time it may run , 5min=300sec
+            print('~~timeisup~~')
+            break   #return because the time is up
+        i+=1
+        count = localSearch(reservatieLijst,cars,Cost)
+        if(i%100==0):
+            print(i,bestCost,count)
+        
+        cost = Cost.getCost(reservatieLijst)
+        code = Code.formCode(reservatieLijst,cars,cost)
+        Code.add(code)
+        if(cost<bestCost):
+            code = Code.formCode(reservatieLijst,cars,cost)
+            print("newBest",cost)
+            bestcars = copy.deepcopy(cars)
+            bestreservatieLijst =copy.deepcopy(reservatieLijst)
+            Code.add(code)
+            bestCost = cost
+            
+            
+        changed = forceAssign(reservatieLijst,cars)
+        cost = Cost.getCost(reservatieLijst)
+        code = Code.formCode(reservatieLijst,cars,cost)
+        Code.add(code)
+        if(not(changed)):
+            print("No more changes after:",i)
+            break
+
+    writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
+
+    
+    Printer.printFinal(bestCost,reservatieLijst,cars,Code)
+  
+if __name__ == "__main__":
     arr = glob.glob(".\csv\*.csv")
     print('options:')
     i = 0
@@ -157,79 +207,6 @@ def main():
         
     fnr = int(input("Choose file nr: "))
     f = filenames[fnr]
-    cars, reservatieLijst = readCSV(Car,Reservation,'./csv/'+f+'.csv')
-    print('Cars:')
-    for c in cars:
-        print('   ',c)
-
-    print('Dictionaries:')  
-    print('   carIDtoStr',Car.carIDtoStr)
-    print('   carStrtoID',Car.carStrtoID)
-    print('   zoneIDtoStr',Car.zoneIDtoStr)
-    print('   zoneStrtoID',Car.zoneStrtoID)
-    print('   zoneIDtoADJ',Car.zoneIDtoADJ)
-    print('\n'*2)
-    
-    cost = Cost.getCost(reservatieLijst)
-    code = Code.formCode(reservatieLijst,cars,cost)
-    Code.add(code)
-    
-    
-
-    initialSolution1(reservatieLijst,cars)
-    initialCost = Cost.getCost(reservatieLijst)
-    bestCost = initialCost
-    bestcars=None
-    bestreservatieLijst=None
-    printResult(reservatieLijst,cars)
-    print("----------------"*2)
-    print("\ni,bestcost,swaps")
-    """
-    alarm = threading.Timer(10.0, alarmHandler(code))
-    alarm.start()
-    """
-    for i in range(10000):
-        count = localSearch(reservatieLijst,cars)
-        if(i%100==0):
-            print(i,bestCost,count)
-        if((time.perf_counter() - start_time)<10):   #set  time it may run , 5min=300sec
-            cost = Cost.getCost(reservatieLijst)
-            if(cost<bestCost):
-                #writeCSV(cost,Car,cars,reservatieLijst,f)
-                code = Code.formCode(reservatieLijst,cars,cost)
-                print(cost)
-                bestcars = copy.deepcopy(cars)
-                bestreservatieLijst =copy.deepcopy(reservatieLijst)
-                Code.add(code)
-                bestCost = cost
-            changed = forceAssign(reservatieLijst,cars)
-            if(not(changed)):
-                print("No more changes after:",i)
-                break
-            code = Code.formCode(reservatieLijst,cars,cost)
-            Code.add(code)
-        else:                                       #return because the time is up
-            print('~~timeisup~~')
-            print(f)    
-            writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
-            print(len(reservatieLijst),len(cars))
-            print("bestc:",bestCost)
-            print(Cost.getCost(bestreservatieLijst))
-            return
-        code = Code.formCode(reservatieLijst,cars)
-        #print(code)
-        cost = Cost.getCost(reservatieLijst)
-    
-    cost = Cost.getCost(reservatieLijst)
-    print("bestc:",bestCost)
-    print("----------------"*2)
-    printResult(reservatieLijst,cars)
-    for cd in Code.passedCodesPerL:
-        pass#print(cd)
-    print("bestc:",bestCost)
-
-  
-if __name__ == "__main__":
     start_time = time.perf_counter()
-    main()
+    main(f)
     print("--- %s seconds ---" % (time.perf_counter() - start_time))
