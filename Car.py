@@ -6,7 +6,7 @@ Created on Sun Mar 14 10:26:45 2021
 """
 
 class Car:
-    id = 0
+    id = 0 
     carIDtoStr = {}
     carStrtoID = {}
     zoneIDtoStr = {}
