@@ -175,12 +175,12 @@ def main():
     Code.add(code)
     
     
+
     initialSolution1(reservatieLijst,cars)
     initialCost = Cost.getCost(reservatieLijst)
     bestCost = initialCost
     bestcars=None
     bestreservatieLijst=None
-    
     printResult(reservatieLijst,cars)
     print("----------------"*2)
     print("\ni,bestcost,swaps")
@@ -208,15 +208,17 @@ def main():
                 break
             code = Code.formCode(reservatieLijst,cars,cost)
             Code.add(code)
-        else:    
+        else:                                       #return because the time is up
             print('~~timeisup~~')
-            break                                   #return because the time is up
-            
+            print(f)    
+            writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
+            print(len(reservatieLijst),len(cars))
+            print("bestc:",bestCost)
+            print(Cost.getCost(bestreservatieLijst))
+            return
         code = Code.formCode(reservatieLijst,cars)
         #print(code)
         cost = Cost.getCost(reservatieLijst)
-        
-    writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
     
     cost = Cost.getCost(reservatieLijst)
     print("bestc:",bestCost)
