@@ -2,58 +2,27 @@ import glob
 from readCSV import readCSV
 from writeCSV import writeCSV
 from Car import Car
-import threading
 from Reservation import Reservation
 from Cost import Cost
 from Code import Code
 from Printer import Printer
 import copy
 import time
-def handler(signum, frame):
-    print("Times up! Exiting...")
-    exit(0)
-def assignRes(c,r,adj):
-    c.res.append(r)
-    r.notAssigned = False 
-    r.adjZone = adj
-    r.car = c
-def tryAssign(c,r):
-    if(not(c.overlap(r.start,r.end))):
-        if(c.zone == r.zone):#car is in zone of r
-            #print("    assigned to car:",c.id,'\n')
-            adj = False
-        elif(c.zone in Car.zoneIDtoADJ[r.zone]):
-            #print("    assigned adjecent to car",c.id,'\n')
-            adj=True
-        else:
-            #print("    Swap needed",c.id)
-            return False
-        assignRes(c,r,adj)
-        return True
-    else:
-        #print("overlap",c.id)
-        return False
+
 def initialSolution1(reservatieLijst,cars):
     for r in reservatieLijst:
         if(r.notAssigned):
             for c in r.options:
-                    if(tryAssign(c,r)):
                     if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
                         c.addR(r)
                         break            
         if(r.notAssigned):#could not be assigned to any car
             for c in r.options:
                     if(len(c.res)==0):#No other reservations so no problem
-                        #print("    change zone of car",c.id,c.zone,'\n')
-                        c.zone = r.zone
-                        adj = False
-                        assignRes(c,r,adj)
                         c.setZone(r.zone)
                         c.addR(r)
                         break
                     
-
-def localSearch(rlist,cars):
 def localSearch(rlist,cars,Cost):
     count = 0
     while(1):
@@ -67,7 +36,6 @@ def localSearch(rlist,cars,Cost):
         for r in rlist:
             for c in r.options:
                 if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
-                    cost =  c.costToAddr(r)
                     cost =  Cost.costToAddR(c,r)
                     if(cost>best):
                         best = cost
@@ -78,7 +46,6 @@ def localSearch(rlist,cars,Cost):
         #All sensible 'car zone' swaps
         for c in cars:
             for r in c.res:
-                cost =  c.costToSetZ(r.zone)
                 cost =  Cost.costToSetZone(c,r.zone)
                 #print("zoneCost:",cost)
                 if(cost>best):
@@ -92,7 +59,6 @@ def localSearch(rlist,cars,Cost):
             if(bestr.car):#if currently assigned to a car, remove from list
                 bestr.car.res.remove(bestr)
             #assign to new car
-            bestc.addr(bestr)
             bestc.addR(bestr)
         else:
             return count
@@ -125,16 +91,13 @@ def forceAssign(rlist,cars):
         nextcode = bestc.changeCode(bestr,nextcode)
         if(Code.inMemory(nextcode)):
             input("was in memory HOW")
-    
             
         bestc.setZone(bestr.zone)
-        bestc.addr(bestr)
         bestc.addR(bestr)
         return 1
     else:
         print("No Forced assign")
         return 0
-                    
     
 def main(f):
     cars, reservatieLijst = readCSV(Car,Reservation,'./csv/'+f+'.csv')
