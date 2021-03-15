@@ -25,7 +25,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
                 zonesList.append(tempZone)
             elif row[0][0] == "c": # car
                 carsList.append(row[0])
-                
+    
     # enter into datastructures        
     cars = []
     reservatieLijst = []
