@@ -208,31 +208,15 @@ def main():
                 break
             code = Code.formCode(reservatieLijst,cars,cost)
             Code.add(code)
-        else:                                       #return because the time is up
+        else:    
             print('~~timeisup~~')
-            print(f)
+            break                                   #return because the time is up
             
-            writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
-
-            print(len(reservatieLijst),len(cars))
-            # 5,3
-            # rrrrrccc
-            # r -> r.Car.id
-            # c -> c.zone (zone id)
-            """
-            for r in reservatieLijst:
-                r.car = int(code[r.id])
-            for c in cars:
-                r.zone = int(code[len(reservatieLijst)+c.id])
-            """
-            
-        
-            print("bestc:",bestCost)
-            print(Cost.getCost(bestreservatieLijst))
-            return
         code = Code.formCode(reservatieLijst,cars)
         #print(code)
         cost = Cost.getCost(reservatieLijst)
+        
+    writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
     
     cost = Cost.getCost(reservatieLijst)
     print("bestc:",bestCost)
