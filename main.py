@@ -87,8 +87,18 @@ def localSearch(rlist,cars):
             bestc.addr(bestr)
         else:
             return count
-   
+
+def methaheuristiek():
+    """
+    Metaheuristiek toepassen
+    """
+    pass
 def forceAssign(rlist,cars):
+    """
+    
+    Zoekruimte uitbreiden naar adjZone
+    
+    """
     minL = 99999999999 
     bestc = None
     bestr = None
@@ -96,8 +106,7 @@ def forceAssign(rlist,cars):
     for r in rlist:
         #print(r)
         if(r.notAssigned):
-            for c in r.options:
-                
+            for c in r.options:        
                 if(len(c.res)<minL):
                     """
                     NIET AANPASSEN 
@@ -114,6 +123,7 @@ def forceAssign(rlist,cars):
                     minL = len(c.res)
                     bestc = c
                     bestr = r
+            
     if(bestr):
         
         nextcode = Code.formCode(rlist,cars)
@@ -126,6 +136,7 @@ def forceAssign(rlist,cars):
         bestc.addr(bestr)
         return 1
     else:
+        
         print("No Forced assign")
         return 0
                     
@@ -137,7 +148,7 @@ def printResult(rlist,cars):
     for r in rlist:
         print('   ',r)
         print('   ',r.notAssigned,r.adjZone)
-def main():
+def main(config):
     arr = glob.glob(".\csv\*.csv")
     print('options:')
     i = 0
@@ -184,7 +195,13 @@ def main():
             if(cost<bestCost):
                 writeCSV(cost,Car,cars,reservatieLijst,f)
                 code = Code.formCode(reservatieLijst,cars,cost)
-                Code.add(code)
+                strCode = Code.codeToStr(code)
+                """
+                save beste code
+                als timer afgaat: 
+                        converteer code terug naar reservatielijst,cars,cost
+                        save met writeCSV(cost,Car,cars,reservatieLijst,f)
+                """
                 bestCost = cost
             changed = forceAssign(reservatieLijst,cars)
             if(not(changed)):
@@ -205,12 +222,21 @@ def main():
     print("bestc:",bestCost)
     print("----------------"*2)
     printResult(reservatieLijst,cars)
+    sum2 = 0
     for cd in Code.passedCodesPerL:
-        pass#print(cd)
+        print(len( Code.passedCodesPerL[cd]))
+        sum2+=len( Code.passedCodesPerL[cd])
     print("bestc:",bestCost)
+    print(sum2)
 
   
 if __name__ == "__main__":
+    config = None
+    """
+    Lees parameters in 
+    "input_file" "solution_file" "time_limit" "random_seed" "num_threads"
+    config
+    """
     start_time = time.perf_counter()
-    main()
+    main(config)
     print("--- %s seconds ---" % (time.perf_counter() - start_time))

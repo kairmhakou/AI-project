@@ -111,6 +111,9 @@ class Car:
         i = 0
         while(i<len(self.res)):
             r = self.res[i]
+            if(r.id == bestr.id):
+                i+=1
+                continue
             if(nres.overlap(r.start,r.end)):
                 code[0][r.id] = 'x'
             i+=1
