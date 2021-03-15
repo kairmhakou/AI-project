@@ -27,7 +27,11 @@ class Printer:
         print("----------------"*2)
         Printer.printResult(reservatieLijst,cars)
         for cd in Code.passedCodesPerL:
-            pass#print(cd)
+            your_list = Code.passedCodesPerL[cd]
+            #length of code set , amount in code set , no duplicates(ideally True)
+            print(cd,len(your_list),len(your_list) == len(set(your_list)))
+            
+           
         print("bestc:",bestCost)
         
 if __name__ == "__main__":

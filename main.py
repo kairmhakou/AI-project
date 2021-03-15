@@ -31,16 +31,30 @@ def localSearch(rlist,cars,Cost):
         bestc = None
         bestz = None
         bestr = None
-        
+        curCode = Code.formCode(rlist,cars)
         #All possible 'assigned car' swaps
         for r in rlist:
             for c in r.options:
                 if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
+                    
+                
                     cost =  Cost.costToAddR(c,r)
                     if(cost>best):
+                        
+                        
                         best = cost
                         bestc = c
                         bestr = r
+                        
+                        nextcode = copy.deepcopy(curCode)
+                        nextcode[0][bestr.id]=bestc.id
+                        for tempr in bestc.res:
+                            if(bestr.overlap(tempr.start,tempr.end)):
+                                #overlap => r zou moeten worden verwijderd
+                                nextcode[0][tempr.id]='x'
+                        if(Code.inMemory(nextcode)):
+                            continue
+                        
                         #print(bestc.id,best,bestr)
         
         #All sensible 'car zone' swaps
@@ -55,14 +69,22 @@ def localSearch(rlist,cars,Cost):
                     #print(bestc.id,best,bestz)
         if(bestz is not None):
             bestc.setZone(bestz)
+            
         elif(bestr is not None):
             if(bestr.car):#if currently assigned to a car, remove from list
                 bestr.car.res.remove(bestr)
             #assign to new car
             bestc.addR(bestr)
+
         else:
             return count
-   
+        #removing the following improves speed decreases result
+        code = Code.formCode(rlist,cars,cost)
+        
+        if(Code.inMemory(code)):
+            pass#print("saved")
+        else:
+            Code.add(code)
 def forceAssign(rlist,cars):
     minL = 99999999999
     bestc = None
@@ -94,6 +116,13 @@ def forceAssign(rlist,cars):
             
         bestc.setZone(bestr.zone)
         bestc.addR(bestr)
+        
+        cost = Cost.getCost(rlist)
+        code = Code.formCode(rlist,cars,cost)
+        if(Code.inMemory(code)):
+            print("saved2")
+        else:
+            Code.add(code)
         return 1
     else:
         print("No Forced assign")
@@ -121,7 +150,7 @@ def main(f):
     bestreservatieLijst =copy.deepcopy(reservatieLijst)
     
     print("----------------"*2)
-    print("\ni,bestcost,swaps")
+    print("\ni,cost,swaps,bestCost")
     i = 0
     while(1):
         if((time.perf_counter() - start_time)>300):   #set  time it may run , 5min=300sec
@@ -130,24 +159,17 @@ def main(f):
         i+=1
         count = localSearch(reservatieLijst,cars,Cost)
         if(i%100==0):
-            print(i,bestCost,count)
+            print(i,':',cost,count,bestCost)
         
         cost = Cost.getCost(reservatieLijst)
-        code = Code.formCode(reservatieLijst,cars,cost)
-        Code.add(code)
         if(cost<bestCost):
-            code = Code.formCode(reservatieLijst,cars,cost)
             print("newBest",cost)
             bestcars = copy.deepcopy(cars)
             bestreservatieLijst =copy.deepcopy(reservatieLijst)
-            Code.add(code)
             bestCost = cost
             
             
         changed = forceAssign(reservatieLijst,cars)
-        cost = Cost.getCost(reservatieLijst)
-        code = Code.formCode(reservatieLijst,cars,cost)
-        Code.add(code)
         if(not(changed)):
             print("No more changes after:",i)
             break
