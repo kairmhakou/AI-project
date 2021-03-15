@@ -90,7 +90,10 @@ class Car:
                 self.res.pop(i)
                 i-=1
             i+=1
-            
+
+
+
+    #eigin versie van de changCode functie         
     def changeCode(self,bestr,code):  
         zone = bestr.zone
         code[0][bestr.id] = self.id
