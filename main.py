@@ -6,6 +6,7 @@ import threading
 from Reservation import Reservation
 from Cost import Cost
 from Code import Code
+import copy
 import time
 def handler(signum, frame):
     print("Times up! Exiting...")
@@ -23,7 +24,6 @@ def tryAssign(c,r):
         elif(c.zone in Car.zoneIDtoADJ[r.zone]):
             #print("    assigned adjecent to car",c.id,'\n')
             adj=True
-
         else:
             #print("    Swap needed",c.id)
             return False
@@ -178,6 +178,8 @@ def main():
     initialSolution1(reservatieLijst,cars)
     initialCost = Cost.getCost(reservatieLijst)
     bestCost = initialCost
+    bestcars=None
+    bestreservatieLijst=None
     
     printResult(reservatieLijst,cars)
     print("----------------"*2)
@@ -190,13 +192,14 @@ def main():
         count = localSearch(reservatieLijst,cars)
         if(i%100==0):
             print(i,bestCost,count)
-        if((time.perf_counter() - start_time)<300):   #set  time it may run , 5min=300sec
+        if((time.perf_counter() - start_time)<10):   #set  time it may run , 5min=300sec
             cost = Cost.getCost(reservatieLijst)
             if(cost<bestCost):
                 #writeCSV(cost,Car,cars,reservatieLijst,f)
                 code = Code.formCode(reservatieLijst,cars,cost)
                 print(cost)
-                
+                bestcars = copy.deepcopy(cars)
+                bestreservatieLijst =copy.deepcopy(reservatieLijst)
                 Code.add(code)
                 bestCost = cost
             changed = forceAssign(reservatieLijst,cars)
@@ -208,8 +211,10 @@ def main():
         else:                                       #return because the time is up
             print('~~timeisup~~')
             print(f)
-            writeCSV(bestCost,Car,cars,reservatieLijst,f)
-            print(len(reservatieLijst),len(cars)
+            
+            writeCSV(bestCost,Car,bestcars,bestreservatieLijst,f)
+
+            print(len(reservatieLijst),len(cars))
             # 5,3
             # rrrrrccc
             # r -> r.Car.id
@@ -223,6 +228,7 @@ def main():
             
         
             print("bestc:",bestCost)
+            print(Cost.getCost(bestreservatieLijst))
             return
         code = Code.formCode(reservatieLijst,cars)
         #print(code)
