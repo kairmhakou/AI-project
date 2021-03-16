@@ -22,17 +22,18 @@ class Printer:
         print('   zoneStrtoID',Car.zoneStrtoID)
         print('   zoneIDtoADJ',Car.zoneIDtoADJ)
         print('\n'*2)
-    def printFinal(bestCost,reservatieLijst,cars,Code):
-        print("bestc:",bestCost)
+    def printFinal(solver,Code):
+        
+        print("bestc:",solver.bestCost)
         print("----------------"*2)
-        Printer.printResult(reservatieLijst,cars)
+        Printer.printResult(solver.bestrlist,solver.bestcars)
         for cd in Code.passedCodesPerL:
             your_list = Code.passedCodesPerL[cd]
             #length of code set , amount in code set , no duplicates(ideally True)
             print(cd,len(your_list),len(your_list) == len(set(your_list)))
             
            
-        print("bestc:",bestCost)
+        print("bestc:",solver.bestCost)
         
 if __name__ == "__main__":
     pass

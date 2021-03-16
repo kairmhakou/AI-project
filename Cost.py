@@ -24,8 +24,7 @@ class Cost:
             if(nres.overlap(r.start,r.end)):
                 #overlap => r zou moeten worden verwijderd
                 cost -= (r.P1-r.cost())
-        return cost
-    
+        return cost 
     
 if __name__ == "__main__":
     pass

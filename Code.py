@@ -4,18 +4,21 @@ Created on Sun Mar 14 14:03:22 2021
 
 @author: dehan
 """
-import bisect 
+
+"""
+To Do: Vervang bisect.insort door gwn een loop 
+"""
+import bisect  
 class Code:
-    #passedCodes = []
+    #passedCodes = [] #split single list of all passed codes into dictionary of lists divided based on len(code)
     passedCodesPerL = {}
-    def formCode(rlist,cars,cost=0):
-        ccode = []
-        rcode = []
-        for r in rlist:
+    def formCode(solver,):
+        rcode,ccode = [],[]
+        for r in solver.rlist:
             rcode.append(r.code())
-        for c in cars:
+        for c in solver.cars:
             ccode.append(c.code())
-        return [rcode,ccode,cost]
+        return [rcode,ccode]
     def add(ncode):
         c = Code.codeToStr(ncode)
         lenC = len(c)
@@ -42,9 +45,9 @@ class Code:
         #print(s)
         return s
     def find(L, target):
+        #binary search trough list
         start = 0
         end = len(L) - 1
-    
         while start <= end:
             middle = int((start + end)/ 2)
             midpoint = L[middle]
@@ -63,14 +66,12 @@ class Code:
             => lage kans dat twee verschillende code dezelfde lengte hebben
         => moeten meestal niet zoeken door een lijst van duizende code
         """
-        
-        
         codeString = Code.codeToStr(code)
         lenCodeString = len(codeString)
         if(not(lenCodeString in Code.passedCodesPerL)):
-            return False
+            return False # No other codes of this length
         if(Code.find(Code.passedCodesPerL[lenCodeString],codeString)):
-            return True
+            return True # Code found in memory
         else:
             return False
 

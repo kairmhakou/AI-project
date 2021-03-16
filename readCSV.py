@@ -44,7 +44,6 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         for z in AdjectentZone:
             IDset.add(Car.zoneStrtoID[z])
         Car.zoneIDtoADJ.append(IDset)
-        print(Car.zoneIDtoADJ)
         i+=1
     Reservation.zoneIDtoADJ = Car.zoneIDtoADJ
     j = 0
