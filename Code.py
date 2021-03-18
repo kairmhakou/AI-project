@@ -10,6 +10,7 @@ To Do: Vervang bisect.insort door gwn een loop
 """
 import bisect  
 class Code:
+    memCount = 0
     #passedCodes = [] #split single list of all passed codes into dictionary of lists divided based on len(code)
     passedCodesPerL = {}
     def formCode(solver,):
@@ -41,7 +42,7 @@ class Code:
         for r in code[0]:
             s+=str(r)
         for c in code[1]:
-            s+=str(r)
+            s+=str(c)
         #print(s)
         return s
     def find(L, target):
@@ -71,6 +72,7 @@ class Code:
         if(not(lenCodeString in Code.passedCodesPerL)):
             return False # No other codes of this length
         if(Code.find(Code.passedCodesPerL[lenCodeString],codeString)):
+            Code.memCount += 1
             return True # Code found in memory
         else:
             return False

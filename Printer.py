@@ -26,11 +26,15 @@ class Printer:
         
         print("bestc:",solver.bestCost)
         print("----------------"*2)
-        Printer.printResult(solver.bestrlist,solver.bestcars)
+        #Printer.printResult(solver.bestrlist,solver.bestcars)
+        
+        codecount = 0
         for cd in Code.passedCodesPerL:
             your_list = Code.passedCodesPerL[cd]
             #length of code set , amount in code set , no duplicates(ideally True)
             print(cd,len(your_list),len(your_list) == len(set(your_list)))
+            codecount += len(your_list)
+        print(codecount,Code.memCount)
             
            
         print("bestc:",solver.bestCost)

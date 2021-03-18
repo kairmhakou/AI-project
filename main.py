@@ -43,45 +43,102 @@ class Solver:
         self.bestcars = copy.deepcopy(self.cars)
         self.bestrlist = copy.deepcopy(self.rlist)
       
+    def steepest_descent(self):
+        bestc = None
+        bestz = None
+        bestr = None
+        best = 0 #verbetering >0
+        #All possible 'assigned car' swaps
+        for r in self.rlist:
+            for c in r.options:
+                if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
+                    cost =  Cost.costToAddR(c,r)
+                    if(cost>best):
+                        nextcode = copy.deepcopy(self.curcode)
+                        for tempr in c.res:
+                            if(r.overlap(tempr.start,tempr.end)):
+                                #overlap => r zou moeten worden verwijderd
+                                nextcode[0][tempr.id]='x'
+                        nextcode[0][r.id]=c.id
+                        if(Code.inMemory(nextcode)):
+                            continue
+                        best = cost
+                        bestc = c
+                        bestr = r
+            
+        #All sensible 'car zone' swaps
+        for c in self.cars:
+            for r in c.res:
+                cost =  Cost.costToSetZone(c,r.zone)
+                #print("zoneCost:",cost)
+                if(cost>best):
+                    
+                    
+                    nextcode = copy.deepcopy(self.curcode)
+                    nextcode[1][c.id] = r.zone 
+                    for tempr in c.res:
+                        if(tempr.zone == r.zone):
+                            pass
+                        elif(tempr.zone in Car.zoneIDtoADJ[r.zone]):
+                            pass
+                        else:
+                            nextcode[0][tempr.id]='x'
+                    if(Code.inMemory(nextcode)):
+                        continue
+                    
+                    
+                    best = cost
+                    bestc = c
+                    bestz = r.zone
+                    #print(bestc.id,best,bestz)
+        return bestc,bestz,bestr
+    def hill_climbing(self):
+        best = 0 #verbetering >0
+        #All possible 'assigned car' swaps
+        for r in self.rlist:
+            for c in r.options:
+                if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
+                    cost =  Cost.costToAddR(c,r)
+                    if(cost>best):
+                        nextcode = copy.deepcopy(self.curcode)
+                        for tempr in c.res:
+                            if(r.overlap(tempr.start,tempr.end)):
+                                #overlap => r zou moeten worden verwijderd
+                                nextcode[0][tempr.id]='x'
+                        nextcode[0][r.id]=c.id
+                        if(Code.inMemory(nextcode)):
+                            continue
+                        return c,None,r
+            
+        #All sensible 'car zone' swaps
+        for c in self.cars:
+            for r in c.res:
+                cost =  Cost.costToSetZone(c,r.zone)
+                #print("zoneCost:",cost)
+                if(cost>best):
+                    
+                    nextcode = copy.deepcopy(self.curcode)
+                    nextcode[1][c.id] = r.zone 
+                    for tempr in c.res:
+                        if(tempr.zone == r.zone):
+                            pass
+                        elif(tempr.zone in Car.zoneIDtoADJ[r.zone]):
+                            pass
+                        else:
+                            nextcode[0][tempr.id]='x'
+                    if(Code.inMemory(nextcode)):
+                        continue
+                    return c,r.zone,None
+        return None,None,None
+
     def localSearch(self,Cost):
         count = 0
         while(1):
             count += 1
-            best = 0 #verbetering >0
-            bestc = None
-            bestz = None
-            bestr = None
-            #All possible 'assigned car' swaps
-            for r in self.rlist:
-                for c in r.options:
-                    if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
-                        
-                        cost =  Cost.costToAddR(c,r)
-                        if(cost>best):
-                            
-                            best = cost
-                            bestc = c
-                            bestr = r
-                            
-                            nextcode = copy.deepcopy(self.curcode)
-                            nextcode[0][bestr.id]=bestc.id
-                            for tempr in bestc.res:
-                                if(bestr.overlap(tempr.start,tempr.end)):
-                                    #overlap => r zou moeten worden verwijderd
-                                    nextcode[0][tempr.id]='x'
-                            if(Code.inMemory(nextcode)):
-                                continue
+            #pick one of the local search methods
+            #bestc,bestz,bestr = self.hill_climbing()
+            bestc,bestz,bestr = self.steepest_descent()
             
-            #All sensible 'car zone' swaps
-            for c in self.cars:
-                for r in c.res:
-                    cost =  Cost.costToSetZone(c,r.zone)
-                    #print("zoneCost:",cost)
-                    if(cost>best):
-                        best = cost
-                        bestc = c
-                        bestz = r.zone
-                        #print(bestc.id,best,bestz)
             if(bestz is not None):
                 bestc.setZone(bestz)
             elif(bestr is not None):
@@ -94,14 +151,18 @@ class Solver:
                 return count
             
             #removing the following improves speed decreases result
-            code = Code.formCode(self)
+            code = Code.formCode(self) 
             self.curcode = code
-            if(not(Code.inMemory(code))):
+            if(Code.inMemory(code)):
+                print("iets fout met nextcode in localSearch")
+            else:
                 Code.add(code)
     def findSolution(self):
         i = 0
         start = time.perf_counter()
         while(1):
+            
+                            
             if((time.perf_counter()-start) > self.maxtime):
                 print('~~timeisup~~')
                 break   #return because the time is up
@@ -114,17 +175,17 @@ class Solver:
                 print("newBest",cost)
                 self.setBest()
                 
-                
+            
             changed = self.forceAssign()
             if(not(changed)):
                 print("No more changes after:",i)
                 break
             
+            
     def forceAssign(self):
         minL = 99999999999
         bestc = None
         bestr = None
-        nextcode = Code.formCode(self)
         for r in self.rlist:
             if(r.notAssigned):
                 for c in r.options:
@@ -134,9 +195,8 @@ class Solver:
                         #controleer of nextcode al in memory zit
                         #   zo ja deze aanpassing niet uitvoeren 
                         #   => geen oneindige lussen
-                        nextcode = Code.formCode(self)
-                        nextcode[0][r.id] = c.id #r would be assign to c (addR)
-                        nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
+                        nextcode = copy.deepcopy(self.curcode)
+                    
                         i = 0
                         #addR and setZone will remove conflicts: r not in zone/adjZone, overlap
                         while(i<len(c.res)):
@@ -148,7 +208,9 @@ class Solver:
                             elif(r.overlap(tempr.start,tempr.end)):
                                 nextcode[0][tempr.id] = 'x'
                             i+=1
-                    
+                        
+                        nextcode[0][r.id] = c.id #r would be assign to c (addR)
+                        nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
                         if(Code.inMemory(nextcode)):
                             continue
                         ###################
@@ -159,11 +221,12 @@ class Solver:
             bestc.setZone(bestr.zone)
             bestc.addR(bestr)
             code = Code.formCode(self)
-
+            self.curcode = code
             if(Code.inMemory(code)):
-                print("iets fout met nextcode")
-            self.curecode = code
-            Code.add(code)
+                print("iets fout met nextcode in forceAssign")
+            else:
+                Code.add(code)
+            
             return 1
         else:
             print("No Forced assign")
