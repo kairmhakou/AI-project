@@ -20,13 +20,7 @@ class Reservation:
         
     def cost(self):
         return self.notAssigned*self.P1 + self.adjZone*self.P2
-    """
-        if(self.notAssigned):
-            return self.P1
-        if(self.adjZone):
-            return self.P2
-        return 0
-    """
+
     def costNewZone(self,zone):
         #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):
@@ -38,7 +32,7 @@ class Reservation:
     
     def overlap(self,start,end):
         #https://stackoverflow.com/questions/13513932/algorithm-to-detect-overlapping-periods
-        return (self.start <= end and start <= self.end)
+        return (self.start < end and start < self.end)
 
     
     def code(self):
@@ -52,9 +46,7 @@ class Reservation:
         s+=", zone: "+str(self.zone)
         s+= ", P1/P2: "+str(self.P1)+'/'+str(self.P2)
         s+= ", s/e: "+str(self.start)+'/'+str(self.end)
-      
         s += " / len(CarOptions):"+ str(len(self.options))+" assign to: "
-        
         if(self.car):
             s+=str(self.car.id)
         return s

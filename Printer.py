@@ -4,7 +4,7 @@ Created on Mon Mar 15 17:50:39 2021
 
 @author: dehan
 """
-
+import random
 class Printer:              
     def printResult(rlist,cars):
         print('Cars:')
@@ -40,4 +40,10 @@ class Printer:
         print("bestc:",solver.bestCost)
         
 if __name__ == "__main__":
-    pass
+    random.seed = 10 
+    print(random.random())
+    print(random.random())
+    random.seed = 10 
+    print("----")
+    print(random.random())
+    print(random.random())

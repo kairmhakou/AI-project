@@ -21,8 +21,6 @@ class Code:
             ccode.append(c.code())
         return [rcode,ccode]
     def add(ncode):
-        c = Code.codeToStr(ncode)
-        lenC = len(c)
         #plaat op juiste plaats (gesorteerd)
         #bisect.insort(Code.passedCodes, c) 
     
@@ -30,17 +28,24 @@ class Code:
         #https://stackoverflow.com/questions/360040/which-is-faster-hash-lookup-or-binary-search
         #test: set 173 sec, array + binary search : 141 sec
         #binary search without splitting codes in dictionary: 156 sec
+        
+        c = Code.codeToStr(ncode)
+        lenC = len(c)
         if(lenC in Code.passedCodesPerL):
             #Code.passedCodesPerL[lenC].append(c)
             bisect.insort(Code.passedCodesPerL[lenC], c) 
         else:
             Code.passedCodesPerL[lenC] = []
-            Code.passedCodesPerL[lenC].append(c)
-            
+            Code.passedCodesPerL[lenC].append(c)  
+        
+      
     def codeToStr(code):
         s = ''
         for r in code[0]:
-            s+=str(r)
+            if(r == 'x'):
+                s+="10"
+            else:
+                s+=str(r)
         for c in code[1]:
             s+=str(c)
         #print(s)

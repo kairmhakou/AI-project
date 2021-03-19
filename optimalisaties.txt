@@ -1,0 +1,49 @@
+Mogelijke optimalisatie:
+
+Code:
+	Momenteel:
+		dictionary van lijsten
+		key = lengte van de code
+		lijst bevat elke code van die lengte
+		inMemory -> binary search door lijst met overeenkomstige lengte
+
+	Mogelijk andere methode: /veel trager
+		boom structuur elk niveau een element van de code
+		code niet aanwezig -> voeg takken toe
+
+class Node:
+    def __init__(self):
+
+        self.next = [None]*10#0-9
+        #self.next = {0:None,1:None,2:None,3:None,4:None,5:None,6:None,7:None,8:None,9:None}
+root = Node()
+    def add_2(ncode):    
+        code = Code.codeToStr(ncode)
+        intcode = [int(c) for c in code]
+        node = Code.root
+
+        for i in intcode:
+            if(node.next[i] == None):
+                node.next[i] = Node()
+            node = node.next[i]
+    def inMemory_2(code):
+        
+        strcode = Code.codeToStr(code)
+        intcode = [int(c) for c in strcode]
+        node = Code.root
+        for i in intcode:
+            if(node.next[i] == None):
+                return 0
+            node = node.next[i]
+        return 1
+
+
+Overlap:
+	Momenteel:
+		bij het toevoegen van een nieuwe reservatie aan een auto wordt:
+			(self.start < end and start < self.end)
+		uitgevoerd voor elke reservatie in c.res
+
+	Mogelijk andere methode: / trager
+		Voor elke reservatie, lijst bijhouden van overlappende reservaties
+		Check of de car.id's overeenkomen

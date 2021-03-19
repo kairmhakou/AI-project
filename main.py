@@ -12,10 +12,37 @@ from Printer import Printer
 
 
 class Solver:
-    def __init__(self,f,maxtime = 300):
+    def __init__(self,f,maxtime = 300, random_seed = 10):
+
         self.maxtime = maxtime
         self.f = f
         self.cars, self.rlist = readCSV(Car,Reservation,'./csv/'+self.f+'.csv')
+        
+        self.sorted_rlist = []
+        
+        """
+        #niet nuttig
+        self.overlaps = []
+        for r in self.rlist:
+            o = []
+            for r2 in self.rlist:
+                if(r.id != r2.id):
+                    if(r.overlap(r2.start,r2.end)):
+                        o.append(r2)
+            self.overlaps.append(o)
+        """
+
+        
+        
+        
+        for e in self.rlist:
+            index = 0
+            for i in self.sorted_rlist:
+                if(len(e.options)<len(i.options)):
+                    break
+                index+=1
+            self.sorted_rlist.insert(index,e)
+        
         self.bestCost = None
         self.bestcars = None
         self.bestrlist = None
@@ -24,8 +51,12 @@ class Solver:
         self.curcode = Code.formCode(self)
         Code.add(self.curcode)
         
-    def initialSolution1(self):
-        for r in self.rlist:
+    def initialSolution(self,most_strict):
+        if(most_strict):
+            l = self.sorted_rlist
+        else:
+            l = self.rlist
+        for r in l:
             if(r.notAssigned):
                 for c in r.options:
                         if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
@@ -37,6 +68,7 @@ class Solver:
                             c.setZone(r.zone)
                             c.addR(r)
                             break
+    
     def setBest(self):
         cost = Cost.getCost(self.rlist)
         self.bestCost = cost
@@ -55,8 +87,11 @@ class Solver:
                     cost =  Cost.costToAddR(c,r)
                     if(cost>best):
                         nextcode = copy.deepcopy(self.curcode)
+                        
+                        
                         for tempr in c.res:
                             if(r.overlap(tempr.start,tempr.end)):
+
                                 #overlap => r zou moeten worden verwijderd
                                 nextcode[0][tempr.id]='x'
                         nextcode[0][r.id]=c.id
@@ -132,6 +167,7 @@ class Solver:
         return None,None,None
 
     def localSearch(self,Cost):
+
         count = 0
         while(1):
             count += 1
@@ -190,30 +226,21 @@ class Solver:
             if(r.notAssigned):
                 for c in r.options:
                     if(len(c.res)<minL):
-                        ###################
-                        #Nextcode: Wat zou de code worden indien deze aanpassing wordt gemaakt
-                        #controleer of nextcode al in memory zit
-                        #   zo ja deze aanpassing niet uitvoeren 
-                        #   => geen oneindige lussen
                         nextcode = copy.deepcopy(self.curcode)
-                    
-                        i = 0
                         #addR and setZone will remove conflicts: r not in zone/adjZone, overlap
-                        while(i<len(c.res)):
-                            tempr = c.res[i]
+                        for tempr in c.res:
                             #tempr not in zone/adjZone
                             if(not(tempr.zone == r.zone or tempr.zone in Car.zoneIDtoADJ[r.zone])):
                                 nextcode[0][tempr.id] = 'x' #r can no longer assigned
                             #overlap
                             elif(r.overlap(tempr.start,tempr.end)):
                                 nextcode[0][tempr.id] = 'x'
-                            i+=1
                         
                         nextcode[0][r.id] = c.id #r would be assign to c (addR)
                         nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
                         if(Code.inMemory(nextcode)):
                             continue
-                        ###################
+
                         minL = len(c.res)
                         bestc = c
                         bestr = r
@@ -229,6 +256,7 @@ class Solver:
             
             return 1
         else:
+                
             print("No Forced assign")
             return 0
     
@@ -245,7 +273,7 @@ def main(f):
     solver = Solver(f)
     Printer.printDict(Car)
     
-    solver.initialSolution1()
+    solver.initialSolution(1)
     Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
     
