@@ -1,6 +1,8 @@
 import glob
 import copy
 import time
+import random
+import math
 #
 from readCSV import readCSV
 from writeCSV import writeCSV
@@ -10,6 +12,11 @@ from Cost import Cost
 from Code import Code
 from Printer import Printer
 
+#global variables
+START_TEMPRATURE = 10000
+END_TEMPRATURE= 10
+NUM_ITERATIONS= 1000
+COOLING_RATE = 0.95
 
 class Solver:
     def __init__(self,f,maxtime = 300, random_seed = 10):
@@ -96,12 +103,14 @@ class Solver:
                                 nextcode[0][tempr.id]='x'
                         nextcode[0][r.id]=c.id
                         if(Code.inMemory(nextcode)):
-                            continue
+                            # continue
+                            pass #pas dit aan
                         best = cost
                         bestc = c
                         bestr = r
             
         #All sensible 'car zone' swaps
+        """
         for c in self.cars:
             for r in c.res:
                 cost =  Cost.costToSetZone(c,r.zone)
@@ -126,6 +135,7 @@ class Solver:
                     bestc = c
                     bestz = r.zone
                     #print(bestc.id,best,bestz)
+                    """
         return bestc,bestz,bestr
     def hill_climbing(self):
         best = 0 #verbetering >0
@@ -164,9 +174,10 @@ class Solver:
                     if(Code.inMemory(nextcode)):
                         continue
                     return c,r.zone,None
+        
         return None,None,None
 
-    def localSearch(self,Cost):
+    def localSearch(self):
 
         count = 0
         while(1):
@@ -193,6 +204,7 @@ class Solver:
                 print("iets fout met nextcode in localSearch")
             else:
                 Code.add(code)
+    
     def findSolution(self):
         i = 0
         start = time.perf_counter()
@@ -213,6 +225,7 @@ class Solver:
                 
             
             changed = self.forceAssign()
+            
             if(not(changed)):
                 print("No more changes after:",i)
                 break
@@ -260,14 +273,74 @@ class Solver:
             print("No Forced assign")
             return 0
     
-    def heuristiek(self):
-        """
-        @Karim zet hier u code voor de heuristiek 
-        en vervang forceAssign self.forceAssign in findSolution met deze functie
-        om te testen
-    
-        """
-        pass
+    def freeData(self):
+        for r in self.rlist:
+            r.car = None
+            r.notAssigned=True
+            r.adjZone=False
+        for c in self.cars:
+            c.res=[]
+    def simulatedAnnealing(self):
+        
+        currReservationList = copy.deepcopy(self.rlist)
+        currCarList= copy.deepcopy(self.cars) 
+        currCost = Cost.getCost(self.rlist)
+        
+        #select random  zone and assign it to random car 
+        t = START_TEMPRATURE
+        start = time.perf_counter()
+        bestCost =1111111111111111
+        while t > END_TEMPRATURE:
+            if((time.perf_counter()-start) > self.maxtime):
+                print('~~timeisup~~')
+                break   #return because the time is up
+            
+            i =0 
+            while(i < NUM_ITERATIONS):
+                
+                randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                randomCarIndex = random.randint(0, len(self.cars)-1)
+                randomZoneIndex2 = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                randomCarIndex2 = random.randint(0, len(self.cars)-1)
+                randomZoneIndex3 = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                randomCarIndex3 = random.randint(0, len(self.cars)-1)
+                
+                    
+                c1 = self.cars[randomCarIndex]
+                c1.setZone(randomZoneIndex)
+                c2 =  self.cars[randomCarIndex2]
+                c2.setZone(randomZoneIndex2)
+                c3 =  self.cars[randomCarIndex3]
+                c3.setZone(randomZoneIndex3)
+                
+                self.localSearch()
+                newCost= Cost.getCost(self.rlist)
+                # print(newCost, " ",currCost, randomZoneIndex, randomCarIndex)
+                diff= newCost - currCost
+                if diff > 0:
+                    print("diff < 0" , newCost , diff)
+                    currReservationList = copy.deepcopy(self.rlist)
+                    currCarList= copy.deepcopy(self.cars) 
+                    currCost = Cost.getCost(self.rlist)
+                    if(currCost<bestCost):
+                        bestCost=currCost
+                else:
+                    probability= math.exp(-abs(diff/t))
+                    if(random.uniform(0,1) < probability):
+                        # print("probability" , probability)
+                        currReservationList = copy.deepcopy(self.rlist)
+                        currCarList= copy.deepcopy(self.cars) 
+                        currCost = Cost.getCost(self.rlist)
+                        if(currCost<bestCost):
+                            bestCost=currCost
+                
+                    else:
+                        self.rlist =copy.deepcopy(currReservationList) 
+                        self.cars =copy.deepcopy(currCarList)
+                i += 1
+            t = t * COOLING_RATE
+            print("t" , t ," cost " ,Cost.getCost(self.rlist) , bestCost)
+        return 1 
     
 def main(f):
     solver = Solver(f)
@@ -279,8 +352,8 @@ def main(f):
     
     print("----------------"*2)
     print("\ni,cost,swaps,bestCost")
-    solver.findSolution()
-    
+    # solver.findSolution()
+    solver.simulatedAnnealing()
     writeCSV(solver,Car)
     Printer.printFinal(solver,Code)
     
@@ -291,17 +364,18 @@ if __name__ == "__main__":
     
     """
     arr = glob.glob(".\csv\*.csv")
-    print('options:')
-    i = 0
-    filenames = []
-    for f in arr:
-        file = f.split('\\')[-1]
-        filenames.append(file.split('.')[0])
-        print(i,":",filenames[i])
-        i+=1
+    # print('options:')
+    # i = 0
+    # filenames = []
+    # for f in arr:
+    #     file = f.split('\\')[-1]
+    #     filenames.append(file.split('.')[0])
+    #     print(i,":",filenames[i])
+    #     i+=1
         
-    fnr = int(input("Choose file nr: "))
-    f = filenames[fnr]
+    # fnr = int(input("Choose file nr: "))
+    # f = filenames[fnr]
+    f= "100_5_14_25"
     start_time = time.perf_counter()
     main(f)
     print("--- %s seconds ---" % (time.perf_counter() - start_time))
