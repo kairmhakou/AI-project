@@ -3,6 +3,7 @@ import copy
 import time
 import random
 import math
+import sys
 #
 from readCSV import readCSV
 from writeCSV import writeCSV
@@ -19,13 +20,14 @@ NUM_ITERATIONS= 1000
 COOLING_RATE = 0.95
 
 class Solver:
-    def __init__(self,f,maxtime = 300, random_seed = 10):
+    def __init__(self,f,maxtime, random_seed = 10):
 
         self.maxtime = maxtime
         self.f = f
-        self.cars, self.rlist = readCSV(Car,Reservation,'./csv/'+self.f+'.csv')
+        self.cars, self.rlist = readCSV(Car,Reservation,self.f)
         
         self.sorted_rlist = []
+        
         
         """
         #niet nuttig
@@ -342,8 +344,8 @@ class Solver:
             print("t" , t ," cost " ,Cost.getCost(self.rlist) , bestCost)
         return 1 
     
-def main(f):
-    solver = Solver(f)
+def main(argTime,argFile):
+    solver = Solver(argFile,argTime)
     Printer.printDict(Car)
     
     solver.initialSolution(1)
@@ -377,5 +379,8 @@ if __name__ == "__main__":
     # f = filenames[fnr]
     f= "100_5_14_25"
     start_time = time.perf_counter()
-    main(f)
+    print ("Number of arguments:", len(sys.argv), "arguments")
+    argTime=int(sys.argv[1])
+    argFile=sys.argv[2]
+    main(argTime,argFile)
     print("--- %s seconds ---" % (time.perf_counter() - start_time))
