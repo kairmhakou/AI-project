@@ -29,17 +29,22 @@ class Code:
         if(lenC in Code.passedCodesPerL):
             #Code.passedCodesPerL[lenC].append(c)
             bisect.insort(Code.passedCodesPerL[lenC], c) 
+            # print(Code.passedCodesPerL)
         else:
             Code.passedCodesPerL[lenC] = []
             Code.passedCodesPerL[lenC].append(c)
+            #Code.passedCodesPerL = {16: ['xxxxxxxxxx000000']}
+            
             
     def codeToStr(code):
         s = ''
         for r in code[0]:
             s+=str(r)
         for c in code[1]:
-            s+=str(r)
+            #s+=str(r)
+            s+=str(c)
         #print(s)
+        #example: s= xxxxxxxxxx000000
         return s
     def find(L, target):
         start = 0

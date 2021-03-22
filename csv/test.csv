@@ -1,0 +1,50 @@
++Requests: 10
+req0;z10;3;715;427;car8,car9,car6,car7,car4,car5,car2,car3,car0,car10,car11,car12,car13;430;85
+req1;z0;2;805;232;car2,car0,car1,car10,car12,car13,car8,car9,car6,car7,car4,car5;230;45
+req2;z8;4;608;245;car2,car3,car0,car10,car13,car6;250;50
+req3;z6;1;633;377;car1,car13,car9,car6;380;75
+req4;z9;0;666;297;car3,car10,car11,car12,car13,car8,car5;300;60
+req5;z19;4;591;288;car2,car3,car0,car1,car11,car12,car13,car8,car9,car7,car4,car5;290;60
+req6;z5;0;724;436;car3,car0,car10,car12,car8,car9,car4;440;90
+req7;z13;4;851;322;car13,car5;320;65
+req8;z7;4;652;287;car2,car0,car11,car9;290;60
+req9;z16;1;575;368;car0,car10,car11,car12,car8;370;75
+req10;z20;4;803;275;car2,car3,car11,car12,car8,car9,car6,car4,car5;280;55
++Zones: 20
+z0;z1,z5,z6
+z1;z0,z2,z6,z5,z7
+z2;z1,z3,z7,z6,z8
+z3;z2,z4,z8,z7,z9
+z4;z3,z9,z8
+z5;z6,z0,z1,z10,z11
+z6;z5,z7,z1,z0,z2,z11,z10,z12
+z7;z6,z8,z2,z1,z3,z12,z11,z13
+z8;z7,z9,z3,z2,z4,z13,z12,z14
+z9;z8,z4,z3,z14,z13
+z10;z11,z5,z6,z15,z16
+z11;z10,z12,z6,z5,z7,z16,z15,z17
+z12;z11,z13,z7,z6,z8,z17,z16,z18
+z13;z12,z14,z8,z7,z9,z18,z17,z19
+z14;z13,z9,z8,z19,z18
+z15;z16,z10,z11,z20
+z16;z15,z17,z11,z10,z12,z20
+z17;z16,z18,z12,z11,z13
+z18;z17,z19,z13,z12,z14
+z19;z18,z14,z13
+z20;z15,z16
++Vehicles: 14
+car0
+car1
+car2
+car3
+car4
+car5
+car6
+car7
+car8
+car9
+car10
+car11
+car12
+car13
++Days: 5

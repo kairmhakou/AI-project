@@ -40,16 +40,22 @@ class Car:
 
 
     def costToAddr(self,nres):
-        cost = nres.cost()-(self.zone!=nres.zone)*nres.P2
- 
+        var= (self.zone!=nres.zone)
+        cost = nres.cost()-var*nres.P2
+        # print(cost,"=", nres.cost()," ",var,"*",nres.P2)
+        #cost = nres.cost()-(self.zone!=nres.zone)*nres.P2
+
         #print("add:",nres.id,'to car',self.id,cost,end =",")
         for r in self.res:
-            #print(nres.id,r.id)
-            #print(nres.start,nres.end,r.start,r.end)
+            #print(nres.id," ",r.id)
+            #print(nres.start," ",nres.end," ",r.start," ",r.end)
             if(nres.overlap(r.start,r.end)):
                 #overlap => r zou moeten worden verwijderd
+                # print("old cost", cost)
                 cost -= (r.P1-r.cost())
-        #print("->",cost)
+                # print(cost,"=old cost-(",r.P1,"-",r.cost(),")")
+                
+        # print("->",cost)
         return cost
     def addr(self,nres):
         i = 0

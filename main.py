@@ -6,6 +6,16 @@ from Reservation import Reservation
 from Cost import Cost
 from Code import Code
 import time
+import random
+import math
+
+
+START_TEMPRATURE = 10000
+END_TEMPRATURE= 10
+NUM_ITERATIONS= 1000
+COOLING_RATE = 0.95
+STEP = 15
+
 def handler(signum, frame):
     print("Times up! Exiting...")
     exit(0)
@@ -14,39 +24,113 @@ def assignRes(c,r,adj):
     r.notAssigned = False 
     r.adjZone = adj
     r.car = c
+    # print("assign request id ",r.id, " to car id", c.id )
 def tryAssign(c,r):
     if(not(c.overlap(r.start,r.end))):
+        # print("no overlap",c.zone , r.zone)
         if(c.zone == r.zone):#car is in zone of r
-            #print("    assigned to car:",c.id,'\n')
+            # print("adj false    assigned to car:",c.id,'\n')
             adj = False
         elif(c.zone in Car.zoneIDtoADJ[r.zone]):
-            #print("    assigned adjecent to car",c.id,'\n')
+            # print("adj true    assigned adjecent to car",c.id,'\n')
             adj=True
 
         else:
-            #print("    Swap needed",c.id)
+            # print("    Swap needed",c.id)
             return False
         assignRes(c,r,adj)
         return True
     else:
-        #print("overlap",c.id)
+        # print("overlap",c.id)
         return False
 def initialSolution1(reservatieLijst,cars):
     for r in reservatieLijst:
         if(r.notAssigned):
-            #print(r)
+            #print(r)#add
             for c in r.options:
+                    #print(c)#add
                     if(tryAssign(c,r)):
-                        break            
-        if(r.notAssigned):#could not be assigned to any car
+                        break
+        #  print(r.notAssigned, " before the second if")            
+        if(r.notAssigned):#could not be assigned to any car, because first the cars zone are 0. The car could have be assiged to a request but duo to the initialization they have zone 0
             for c in r.options:
                     if(len(c.res)==0):#No other reservations so no problem
-                        #print("    change zone of car",c.id,c.zone,'\n')
+                         #print("    change zone of car",c.id,c.zone,'\n')
                         c.zone = r.zone
                         adj = False
                         assignRes(c,r,adj)
+                         # print("second if  assign")
                         break
-                    
+def solution(reservatieLijst,cars):
+    for r in reservatieLijst:
+        if(r.notAssigned):
+            # print(r)#add
+            for c in r.options:
+                    # print(c)#add
+                    if(tryAssign(c,r)):
+                        break   
+    return reservatieLijst , cars
+        # if(r.notAssigned):
+        #     for c in r.options:
+        #         adj = False
+        #         assignRes(c,r,adj)
+        #         break
+
+def freeData(currReservationList, currCarList):
+    for r in currReservationList:
+        r.car = None
+        r.notAssigned=True
+        r.adjZone=False
+    for c in currCarList:
+        c.res=[]
+def simulatedAnnealing(reservatieLijst, cars, currCost):
+    bestReservationList, bestCarsList ,bestCost =reservatieLijst, cars,currCost
+    currReservationList , currCarList= reservatieLijst,cars
+    # printResult(bestResvationList,besCarsList)
+    #select random  zone and assign it to random car 
+    t = START_TEMPRATURE
+    while t > END_TEMPRATURE:
+        i =0 
+        while(i < NUM_ITERATIONS):
+            while True:
+                randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                randomCarIndex = random.randint(0, len(cars)-1)
+                car=bestCarsList[randomCarIndex]
+                if(car.zone != randomZoneIndex):
+                    break
+            
+            car.zone= randomZoneIndex
+        
+            freeData(currReservationList, currCarList)
+            
+            # print ( "assign zone ",randomZoneIndex," to car " ,randomCarIndex )
+            # printResult(currReservationList,currCarList)
+            
+            newReservationsList, newCarsList=solution(currReservationList,currCarList)
+            # printResult(newReservationsList,newCarsList)
+            newCost = Cost.getCost(newReservationsList)
+            
+            # print(newCost, "==", currCost )
+            diff = newCost-currCost
+            
+            if diff < 0:
+                currReservationList= newReservationsList
+                currCarList=newCarsList
+                currCost=newCost
+                # print("lesser")
+            else:
+                probability= math.exp(-diff/t)
+                if(random.uniform(0,1) < probability):
+                    # print("probability")
+                    currReservationList= newReservationsList
+                    currCarList=newCarsList
+                    currCost=newCost
+            i += 1
+        t = t * COOLING_RATE
+        print(t)
+    # carReservationRegister = car.res
+    return currReservationList , currCarList, currCost        
+
 
 def localSearch(rlist,cars):
     count = 0
@@ -60,14 +144,15 @@ def localSearch(rlist,cars):
         #All possible 'assigned car' swaps
         for r in rlist:
             for c in r.options:
+                # print("reservationID ",r.id, " --> carid ", c.id," in zone " ,c.zone, ",,, r zone ",r.zone)
                 if((c.zone==r.zone) or (c.zone in Car.zoneIDtoADJ[r.zone])):#only swap if car is in possible zone
                     cost =  c.costToAddr(r)
                     if(cost>best):
                         best = cost
                         bestc = c
                         bestr = r
-                        #print(bestc.id,best,bestr)
-        
+                        # print(bestc.id,best,bestr)
+        # print(best,bestc,bestr)
         #All sensible 'car zone' swaps
         for c in cars:
             for r in c.res:
@@ -78,6 +163,7 @@ def localSearch(rlist,cars):
                     bestc = c
                     bestz = r.zone
                     #print(bestc.id,best,bestz)
+        
         if(bestz is not None):
             bestc.setZone(bestz)
         elif(bestr is not None):
@@ -87,7 +173,10 @@ def localSearch(rlist,cars):
             bestc.addr(bestr)
         else:
             return count
-   
+# def metaheuristiek(reservationList ,carsList):
+#     for r in reservationList:
+#         for c in r.options:
+
 def forceAssign(rlist,cars):
     minL = 99999999999 
     bestc = None
@@ -164,14 +253,22 @@ def main():
     
     cost = Cost.getCost(reservatieLijst)
     code = Code.formCode(reservatieLijst,cars,cost)
+    #code = [['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'], [0, 0, 0, 0, 0, 0], 1000]
+    #gves the code to the dictionary Code.passedCodesPerL
     Code.add(code)
     
     
     initialSolution1(reservatieLijst,cars)
     initialCost = Cost.getCost(reservatieLijst)
     bestCost = initialCost
-    
     printResult(reservatieLijst,cars)
+    # print(bestCost)
+    
+    [bestRList, bestCList,optimalCost]=simulatedAnnealing(reservatieLijst, cars, bestCost)
+    printResult(bestRList,bestCList)
+    print("optimal ", optimalCost)
+    #everything is clear until here
+    
     print("----------------"*2)
     print("\ni,bestcost,swaps")
     for i in range(10000):

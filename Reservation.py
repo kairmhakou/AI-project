@@ -14,7 +14,7 @@ class Reservation:
         self.P2 = P2  # cost for assigning to adjecent zone
         
         self.notAssigned = True #1 -> not assigned
-        self.adjZone = False #1 -> assigned to adjecent zone
+        self.adjZone =  False#1 -> assigned to adjecent zone
         
         self.options = carOptions #id of possible cars
         
@@ -49,6 +49,7 @@ class Reservation:
         s = str(self.id)+ " "
         s += Reservation.resIDtoStr[self.id]
         s+=", zone: "+str(self.zone)
+        s+=", adj zones: "+str(Reservation.zoneIDtoADJ[self.zone])
         s+= ", P1/P2: "+str(self.P1)+'/'+str(self.P2)
         s+= ", start/end: "+str(self.start)+'/'+str(self.end)
       
