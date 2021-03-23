@@ -7,6 +7,13 @@ Created on Sat Mar 13 23:50:06 2021
 import csv
 def writeCSV(solver,Car):
     f = solver.f
+    print(f)
+    f = f.split('/')[-1]
+    #f = f.split('\\')[-1] #een van deze twee splits afh. van OS denk ik
+    #bij errors misschien vervangen
+    
+    f = f.split('.')[0]
+    print(f)
     cars  = solver.bestcars
     cost  = solver.bestCost
     rlist = solver.bestrlist

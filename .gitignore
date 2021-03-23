@@ -2,3 +2,4 @@ __pycache__
 .~lock.toy1.csv#
 *.pyc
 *.csv
+**.csv
