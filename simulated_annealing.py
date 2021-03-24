@@ -21,13 +21,7 @@ class Simulated_Annealing:
     def __init__(self,solver,Code, Car):
         self.solver = solver
     
-    def freeData(self):
-        for r in self.solver.rlist:
-            r.car = None
-            r.notAssigned=True
-            r.adjZone=False
-        for c in self.solver.cars:
-            c.res=[]
+    
     def steepest_descent(self):
         bestc = None
         bestz = None
@@ -112,19 +106,12 @@ class Simulated_Annealing:
                 if((time.perf_counter()-start) > self.solver.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
-                randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
-                randomCarIndex = random.randint(0, len(self.solver.cars)-1)
-                randomZoneIndex2 = random.randint(0, len(Car.zoneIDtoADJ)-1)
-                randomCarIndex2 = random.randint(0, len(self.solver.cars)-1)
-                randomZoneIndex3 = random.randint(0, len(Car.zoneIDtoADJ)-1)
-                randomCarIndex3 = random.randint(0, len(self.solver.cars)-1)
-                    
-                c1 = self.solver.cars[randomCarIndex]
-                c1.setZone(randomZoneIndex)
-                c2 =  self.solver.cars[randomCarIndex2]
-                c2.setZone(randomZoneIndex2)
-                c3 =  self.solver.cars[randomCarIndex3]
-                c3.setZone(randomZoneIndex3)
+                for i in range(3):
+                    randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                    randomCarIndex = random.randint(0, len(self.solver.cars)-1)
+                        
+                    c1 = self.solver.cars[randomCarIndex]
+                    c1.setZone(randomZoneIndex)
                 
                 self.localSearch(0)
                 newCost= Cost.getCost(self.solver.rlist)

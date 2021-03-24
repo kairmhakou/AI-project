@@ -44,12 +44,20 @@ class Solver:
         self.curcode = Code.formCode(self)
         Code.add(self.curcode)
         
+    def freeData(self):
+        for r in self.rlist:
+            r.car = None
+            r.notAssigned=True
+            r.adjZone=False
+        for c in self.cars:
+            c.res=[]
+            
     def setBest(self,):
         cost = Cost.getCost(self.rlist)
         self.bestCost = cost
         self.bestcars = copy.deepcopy(self.cars)
         self.bestrlist = copy.deepcopy(self.rlist)
-        print("newBest",cost)
+        print("SetnewBest",cost)
     def getBest(self):
         return self.bestCost
         
@@ -63,9 +71,22 @@ class Solver:
                 for c in r.options:
                         if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
                             c.addR(r)
-                            break            
+                            break   
+        for r in l:                
             if(r.notAssigned):#could not be assigned to any car
                 for c in r.options:
+                        if(len(c.res)==0):#No other reservations so no problem
+                            c.setZone(r.zone)
+                            c.addR(r)
+                            break
+        for r in l:                
+            if(r.adjZone):#could not be assigned to any car
+                for c in r.options:
+                        if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
+                            c.addR(r)
+                            break
+            if(r.adjZone):#could not be assigned to any car
+                for c in r.options:               
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
                             c.addR(r)
@@ -83,11 +104,13 @@ def main(argTime,argFile):
     print("----------------"*2)
     
     #solver.tabu_search.findSolution()
-    solver.simulated_annealing.simulatedAnnealing()
+    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution2()
+    
+    #solver.simulated_annealing.simulatedAnnealing()
     
     print("----------------"*2)
     
-    
+    solver.bestCost = Cost.getCost(solver.bestrlist)
     writeCSV(solver,Car)
     Printer.printFinal(solver,Code)
     

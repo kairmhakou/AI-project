@@ -6,9 +6,9 @@ Created on Sun Mar 14 10:27:23 2021
 """
 
 class Cost:
-    def getCost(lijst):#Kost berekenen
+    def getCost(rlist):#Kost berekenen
         cost=0
-        for r in lijst:
+        for r in rlist:
             cost += r.cost()
         return cost    
     

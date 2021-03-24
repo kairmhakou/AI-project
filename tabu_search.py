@@ -7,6 +7,7 @@ Created on Tue Mar 23 22:45:53 2021
 import copy
 from Cost import Cost
 import time
+import random
 
 from Code import Code
 from Car import Car
@@ -159,16 +160,110 @@ class Tabu_Search:
                 print("No more changes after:",i)
                 break
             
+    def findPeak(self,start):
+        newBest = 0
+        #while(1):            
+        for i in range(100):   
+            if((time.perf_counter()-start) > self.solver.maxtime):
+                print('~~timeisup~~')
+                break   #return because the time is up
+            i+=1
+            count = self.localSearch(1)
+            cost = Cost.getCost(self.solver.rlist)
+            if(i%50==0):
+                print("\t\t",i,':',cost,count,self.solver.bestCost)
+            if(cost<self.solver.bestCost):
+                self.solver.setBest()
+                newBest = 1
+                
+            changed = self.forceAssign()
             
+            if(not(changed)):
+                print("No more changes after:",i)
+                break
+        return newBest
+    def findSolution2(self):
+        iteration = 0
+        sinceLast = 0
+
+        maxAmount = int(len(self.solver.cars)/1.5)
+        amount = int(len(self.solver.cars)/10)
+        start = time.perf_counter()
+        backupSolver = copy.deepcopy(self.solver)
+        
+        bestrlist = self.solver.rlist
+        bestcars = self.solver.cars
+        
+        code = Code.formCode(self.solver)
+        self.solver.curcode = code
+        if(not(Code.inMemory(code))):
+            Code.add(code)
+        while(1):
+            iteration+=1
+            print(iteration,":",self.solver.getBest())
+            if((time.perf_counter()-start) > self.solver.maxtime):
+                print('~~timeisup~~')
+                self.solver = copy.deepcopy(backupSolver)
+                break   #return because the time is up
+            while(1):
+                for i in range(random.randint(1, amount)):
+                    randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
+                    randomCarIndex = random.randint(0, len(self.solver.cars)-1)
+                        
+                    c1 = self.solver.cars[randomCarIndex]
+                    c1.setZone(randomZoneIndex)
+                code = Code.formCode(self.solver)
+                if(not(Code.inMemory(code))):
+                    Code.add(code)
+                    self.solver.curcode = code
+                    break
+
+            
+                    
+            code = Code.formCode(self.solver)
+            self.solver.curcode = code
+            if(not(Code.inMemory(code))):
+                Code.add(code)
+                   
+            newBest = 0
+            while(1):
+                if(self.findPeak(start)):
+                    newBest = 1
+                else:
+                    break
+                print("go deeper")
+            
+            if(not(newBest)):
+                self.solver.rlist = self.solver.bestrlist
+                self.solver.cars = self.solver.bestcars
+                bestrlist = self.solver.bestrlist
+                bestcars = self.solver.bestcars
+                self.solver = copy.deepcopy(backupSolver)
+                
+                sinceLast+=1
+                if(sinceLast>=10):
+                    sinceLast = 0
+                    amount = min(maxAmount,amount+1)
+                    print("new amountMin",amount)
+            else:
+                backupSolver = copy.deepcopy(self.solver)
+
+                amount = 2
+                print("new amountMax",amount)
+
+        print(Cost.getCost(self.solver.bestrlist))
+        return bestrlist, bestcars
     def forceAssign(self):
         minL = 99999999999
         bestc = None
         bestr = None
+
         for r in self.solver.rlist:
             if(r.notAssigned):
                 for c in r.options:
                     if(len(c.res)<minL):
                         nextcode = copy.deepcopy(self.solver.curcode)
+
                         #addR and setZone will remove conflicts: r not in zone/adjZone, overlap
                         for tempr in c.res:
                             #tempr not in zone/adjZone
@@ -191,6 +286,7 @@ class Tabu_Search:
             bestc.addR(bestr)
             code = Code.formCode(self.solver)
             self.solver.curcode = code
+            
             if(Code.inMemory(code)):
                 print("iets fout met nextcode in forceAssign")
             else:
