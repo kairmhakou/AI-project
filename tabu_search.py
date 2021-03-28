@@ -72,7 +72,7 @@ class Tabu_Search:
     def hill_climbing(self):
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
-        for r in self.rlist:
+        for r in self.solver.rlist:
             for c in r.options:
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
                     cost =  Cost.costToAddR(c,r)
@@ -88,7 +88,7 @@ class Tabu_Search:
                         return c,None,r
             
         #All sensible 'car zone' swaps
-        for c in self.cars:
+        for c in self.solver.cars:
             for r in c.res:
                 cost =  Cost.costToSetZone(c,r.zone)
                 #print("zoneCost:",cost)
@@ -143,9 +143,9 @@ class Tabu_Search:
         i = 0
         start = time.perf_counter()
         while(1):            
-            if((time.perf_counter()-start) > self.solver.maxtime):
-                print('~~timeisup~~')
-                break   #return because the time is up
+            # if((time.perf_counter()-start) > self.solver.maxtime):
+            #     print('~~timeisup~~')
+            #     break   #return because the time is up
             i+=1
             count = self.localSearch(Cost)
             cost = Cost.getCost(self.solver.rlist)
@@ -164,11 +164,12 @@ class Tabu_Search:
         newBest = 0
         #while(1):            
         for i in range(100):   
-            if((time.perf_counter()-start) > self.solver.maxtime):
-                print('~~timeisup~~')
-                break   #return because the time is up
+            # if((time.perf_counter()-start) > self.solver.maxtime):
+            #     print('~~timeisup~~')
+            #     break   #return because the time is up
             i+=1
-            count = self.localSearch(1)
+            # count = self.localSearch(1) #steepest_descent
+            count = self.localSearch() #hill_climbing
             cost = Cost.getCost(self.solver.rlist)
             if(i%50==0):
                 print("\t\t",i,':',cost,count,self.solver.bestCost)
@@ -201,12 +202,12 @@ class Tabu_Search:
         while(1):
             iteration+=1
             print(iteration,":",self.solver.getBest())
-            if((time.perf_counter()-start) > self.solver.maxtime):
-                print('~~timeisup~~')
-                self.solver = copy.deepcopy(backupSolver)
-                break   #return because the time is up
+            # if((time.perf_counter()-start) > self.solver.maxtime):
+            #     print('~~timeisup~~')
+            #     self.solver = copy.deepcopy(backupSolver)
+            #     break   #return because the time is up
             while(1):
-                for i in range(random.randint(1, amount)):
+                for i in range(random.randint(1, amount+20)): #pas dit aan -> amount ipv amount+1
                     randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
                     randomCarIndex = random.randint(0, len(self.solver.cars)-1)
                         
@@ -227,7 +228,7 @@ class Tabu_Search:
                    
             newBest = 0
             while(1):
-                if(self.findPeak(start)):
+                if(self.findPeak(start)): # here lead us to local search
                     newBest = 1
                 else:
                     break
@@ -240,7 +241,7 @@ class Tabu_Search:
                 bestcars = self.solver.bestcars
                 self.solver = copy.deepcopy(backupSolver)
                 
-                sinceLast+=1
+                sinceLast+=1 # waarvoor gebruik je dit here?
                 if(sinceLast>=10):
                     sinceLast = 0
                     amount = min(maxAmount,amount+1)

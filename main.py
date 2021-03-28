@@ -104,19 +104,23 @@ def main(argTime,argFile):
     print("----------------"*2)
     
     #solver.tabu_search.findSolution()
-    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution2()
+    # solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution2()
     
-    #solver.simulated_annealing.simulatedAnnealing()
+    solver.bestrlist , solver.bestcars =solver.simulated_annealing.simulatedAnnealing()
     
     print("----------------"*2)
     
     solver.bestCost = Cost.getCost(solver.bestrlist)
+    print(Cost.getCost(solver.bestrlist))
+    Printer.printResult(solver.bestrlist,solver.cars)
     writeCSV(solver,Car)
     Printer.printFinal(solver,Code)
     
   
 if __name__ == "__main__":
-    argTime=int(sys.argv[1])
-    argFile=sys.argv[2]
+    # argTime=int(sys.argv[1])
+    # argFile=sys.argv[2]
+    argTime=300
+    argFile='./csv/100_5_14_25.csv'
     main(argTime,argFile)
     
