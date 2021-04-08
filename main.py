@@ -57,7 +57,7 @@ class Solver:
         self.bestCost = cost
         self.bestcars = copy.deepcopy(self.cars)
         self.bestrlist = copy.deepcopy(self.rlist)
-        print("SetnewBest",cost)
+        # print("SetnewBest",cost) #uncomment this
     def getBest(self):
         return self.bestCost
         
@@ -112,7 +112,7 @@ def main(argTime,argFile):
     
     solver.bestCost = Cost.getCost(solver.bestrlist)
     print(Cost.getCost(solver.bestrlist))
-    Printer.printResult(solver.bestrlist,solver.cars)
+    # Printer.printResult(solver.bestrlist,solver.cars)
     writeCSV(solver,Car)
     Printer.printFinal(solver,Code)
     
@@ -121,6 +121,6 @@ if __name__ == "__main__":
     # argTime=int(sys.argv[1])
     # argFile=sys.argv[2]
     argTime=300
-    argFile='./csv/100_5_14_25.csv'
+    argFile='./csv/210_5_44_25.csv'
     main(argTime,argFile)
     

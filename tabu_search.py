@@ -202,10 +202,10 @@ class Tabu_Search:
         while(1):
             iteration+=1
             print(iteration,":",self.solver.getBest())
-            # if((time.perf_counter()-start) > self.solver.maxtime):
-            #     print('~~timeisup~~')
-            #     self.solver = copy.deepcopy(backupSolver)
-            #     break   #return because the time is up
+            if((time.perf_counter()-start) > self.solver.maxtime):
+                print('~~timeisup~~')
+                self.solver = copy.deepcopy(backupSolver)
+                break   #return because the time is up
             while(1):
                 for i in range(random.randint(1, amount+20)): #pas dit aan -> amount ipv amount+1
                     randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
