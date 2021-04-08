@@ -1,0 +1,5 @@
+1) overlap < of <=
+2) enkel tijdlimitatie, geen geheugen limitatie?
+3) P1 > P2?
+4) random seed?
+
