@@ -2,22 +2,30 @@ class Reservation:
     id = 0
     resIDtoStr = {}
     zoneIDtoADJ = {}
-    def __init__(self,zone,day,start,duration,P1,P2,carOptions):
+    def __init__(self,zone,day,start,duration,P1,P2):
         self.id = Reservation.id
         Reservation.id += 1
-        self.car = None
+        self.carID = -1#None
         self.zone = zone
+        
         self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
         self.end = self.start + int(duration) #cast day, start, duration from txt to int
-        
         self.P1 = P1  # cost for not assigning Reservation
         self.P2 = P2  # cost for assigning to adjecent zone
         
         self.notAssigned = True #1 -> not assigned
         self.adjZone = False #1 -> assigned to adjecent zone
         
-        self.options = carOptions #id of possible cars
-        
+        self.assignCount = 0
+    def getCar(self,solver):
+        if(self.carID == -1):
+            return None
+        return solver.cars[self.carID]
+        #return self.car
+    
+    def setCar(self,car):
+        self.carID = car
+
     def cost(self):
         return self.notAssigned*self.P1 + self.adjZone*self.P2
 
@@ -36,9 +44,11 @@ class Reservation:
 
     
     def code(self):
-        if(self.car == None):
+        
+        if(self.carID == -1):#None
             return 'x'
-        return self.car.id
+        return self.carID
+        #return self.car
     
     def __str__(self):
         s = str(self.id)+ " "
@@ -48,7 +58,7 @@ class Reservation:
         s+= ", s/e: "+str(self.start)+'/'+str(self.end)
         s += " / len(CarOptions):"+ str(len(self.options))+" assign to: "
         if(self.car):
-            s+=str(self.car.id)
+            s+=str(self.car)#.id)
         return s
 
 if __name__ == "__main__":

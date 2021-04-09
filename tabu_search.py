@@ -15,7 +15,10 @@ from Car import Car
 class Tabu_Search:
     def __init__(self,solver):
         self.solver = solver
-
+        self.timeSpentLS = 0
+        self.timeSpentLA = 0
+        self.timeSpentPert = 0
+        self.timeSpentChoose = 0
     def steepest_descent(self):
         bestc = None
         bestz = None
@@ -23,7 +26,7 @@ class Tabu_Search:
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in self.solver.rlist:
-            for c in r.options:
+            for c in self.solver.options[r.id]:
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
                     cost =  Cost.costToAddR(c,r)
                     if(cost>best):
@@ -75,7 +78,8 @@ class Tabu_Search:
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in self.solver.rlist:
-            for c in r.options:
+            for c in self.solver.options[r.id]:
+
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
                     cost = Cost.costToAddR(c,r)
                     if(cost>best):
@@ -114,7 +118,7 @@ class Tabu_Search:
         return None,None,None
 
     def localSearch(self,steepest_descent = 0):
-
+        tempStart = time.perf_counter()
         count = 0
         while(1):
             count += 1
@@ -127,21 +131,59 @@ class Tabu_Search:
             if(bestz is not None):
                 bestc.setZone(bestz)
             elif(bestr is not None):
-                if(bestr.car):#if currently assigned to a car, remove from list
-                    bestr.car.res.remove(bestr)
+                if(bestr.getCar(self.solver)):#if currently assigned to a car, remove from list
+                    bestr.getCar(self.solver).res.remove(bestr)
                 #assign to new car
                 bestc.addR(bestr)
             else:
                 #reached peak
-                return count
+                break
             
             #removing the following improves speed decreases result
             if(not(Code.add(self.solver))):
                 print("iets fout met nextcode in localSearch")
-        
+        self.timeSpentLS += time.perf_counter()-tempStart
+        return count
+    def leastAssigned(self):
+        tempStart = time.perf_counter()
+        lowest = 999999999999999
+        ret = None        
+        for r in self.solver.rlist:
+                if(r.assignCount<lowest):
+                    for c in self.solver.options[r.id]:
+                        nextcode = Code.formCode(self.solver) 
+                        
+                        #addR and setZone will remove conflicts: r not in zone/adjZone, overlap
+                        for tempr in c.res:
+                            #tempr not in zone/adjZone
+                            if(not(tempr.zone == r.zone or tempr.zone in Car.zoneIDtoADJ[r.zone])):
+                                nextcode[0][tempr.id] = 'x' #r can no longer assigned
+                            #overlap
+                            elif(r.overlap(tempr.start,tempr.end)):
+                                nextcode[0][tempr.id] = 'x'
+                        
+                        nextcode[0][r.id] = c.id #r would be assign to c (addR)
+                        nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
+                        if(Code.inMemory(nextcode)):
+                            continue
+                
+                        bestc = c
+                        bestr = r
+                        lowest = r.assignCount
+        if(bestr):                
+            bestc.setZone(bestr.zone)
+            bestc.addR(bestr) 
+            Code.add(self.solver)
+            print("assigned least popular r",bestr.id,bestr.assignCount)
+        else:
+            print("problemen in leastAssigned")       
+        self.timeSpentLA += time.perf_counter()-tempStart        
+        return ret    
     def findSolution(self):
-	#TODO:
-	#ADD rate of change (% improved in 0.x seconds), shake if too low
+    	#TODO:
+    	#ADD rate of change (% improved in 0.x seconds), shake if too low
+        sinceLast = time.perf_counter()
+        prevBest = 999999999999999
         result = 999999999999999
         resultRlist,resultCars = copy.deepcopy(self.solver.rlist), copy.deepcopy(self.solver.cars)
         bestSolver = copy.deepcopy(self.solver)
@@ -151,6 +193,18 @@ class Tabu_Search:
             if((time.perf_counter()-start) > self.solver.maxtime):
                  print('~~timeisup~~')
                  break   #return because the time is up
+            if((time.perf_counter()-sinceLast) > 5):#atleast x% better every y seconds
+                sinceLast = time.perf_counter()
+                print("checkTime",sinceLast,prevBest,bestSolver.getBest())
+                if(not((prevBest-bestSolver.getBest())/prevBest)>0):
+                    print("too slow")
+                    self.leastAssigned()
+                    if(Cost.getCost(self.solver.bestrlist)<result): 
+                        result = Cost.getCost(self.solver.bestrlist)
+                        resultRlist,resultCars = copy.deepcopy(self.solver.bestrlist), copy.deepcopy(self.solver.bestcars)
+                    bestSolver= copy.deepcopy(self.solver)
+                    self.solver.setBest()
+                prevBest = self.solver.getBest()
             i+=1
             count = self.localSearch(0)
             cost = Cost.getCost(self.solver.rlist)
@@ -159,18 +213,19 @@ class Tabu_Search:
             if(cost<self.solver.bestCost):
                 self.solver.setBest()
                 foundNewBest = 1
-
+                sinceLast = time.perf_counter()
             if(foundNewBest):
                 foundNewBest = 0
                 bestSolver = copy.deepcopy(self.solver)
             else:
                 self.solver = copy.deepcopy(bestSolver)
                 
-
+            
             changed = self.pertubeer()
 
             if(not(changed)):
-                print("No more changes after:",i)
+                print("No more changes after:",i)   
+                self.leastAssigned()
                 if(Cost.getCost(self.solver.bestrlist)<result): 
                     result = Cost.getCost(self.solver.bestrlist)
                     resultRlist,resultCars = copy.deepcopy(self.solver.bestrlist), copy.deepcopy(self.solver.bestcars)
@@ -179,6 +234,11 @@ class Tabu_Search:
         if(Cost.getCost(self.solver.bestrlist)<result): 
                     result = Cost.getCost(self.solver.bestrlist)
                     resultRlist,resultCars = copy.deepcopy(self.solver.bestrlist), copy.deepcopy(self.solver.bestcars)
+        
+        print("time spent in localSearch:",self.timeSpentLS) #11.36  /  99.62
+        print("time spent in leastAssigned:",self.timeSpentLA) #0    /  0.042
+        print("time spent in Pertubeer:",self.timeSpentPert) #6.81   /  88.21
+        print("     time spent in Choose:",self.timeSpentChoose) #6.81   /  88.21
         return resultRlist,resultCars
     def findPeak(self,start,margin):
         newBest = 0    
@@ -224,7 +284,7 @@ class Tabu_Search:
                     amount+=1
                     print("violant shaking")
                     tries = 0
-
+        
     def move(self,start):
         foundNewBest = 0
         margin = 0.2
@@ -275,8 +335,8 @@ class Tabu_Search:
 
     
     def choose(self,r,minL,bestc,bestr):
-
-        for c in r.options:
+        tempStart = time.perf_counter()
+        for c in self.solver.options[r.id]:
             if(len(c.res)<minL):    
                         nextcode = Code.formCode(self.solver) 
                         
@@ -298,20 +358,25 @@ class Tabu_Search:
                         bestc = c
                         bestr = r
                         #break
-       
-        return bestc,bestr
+        #print(time.perf_counter()-tempStart)
+        self.timeSpentChoose += time.perf_counter()-tempStart       
+        return bestc,bestr,minL
     def pertubeer(self):
+        tempStart = time.perf_counter()
         minL = 99999999999
         bestc = None
         bestr = None
         for r in self.solver.rlist:#sorted_rlist
+            
             if(r.notAssigned):
-                bestc,bestr = self.choose(r,minL,bestc,bestr)
+                #print(r.id)
+                bestc,bestr,minL = self.choose(r,minL,bestc,bestr)
+        #input()
         if(bestr is None):
             #print("try adjecent")
             for r in self.solver.rlist:
                 if(r.adjZone):
-                    bestc,bestr = self.choose(r,minL,bestc,bestr)
+                    bestc,bestr,minL = self.choose(r,minL,bestc,bestr)
             
         if(bestr):                
             bestc.setZone(bestr.zone)
@@ -320,8 +385,9 @@ class Tabu_Search:
             if(not(Code.add(self.solver))):
                 print("iets fout met nextcode in forceAssign")
             #print(" Forced assign")    
+            self.timeSpentPert += time.perf_counter()-tempStart       
             return 1
         else:    
-            print("No Forced assign => Shake")
-            self.shake(2)
+            print("No Forced assign")
+            self.timeSpentPert += time.perf_counter()-tempStart                   
             return 0
