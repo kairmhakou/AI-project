@@ -35,14 +35,12 @@ class Solver:
                     break
                 index+=1
             self.sorted_rlist.insert(index,e)
-        
         self.bestCost = None
         self.bestcars = None
         self.bestrlist = None
         
         #base state of solution
-        self.curcode = Code.formCode(self)
-        Code.add(self.curcode)
+        Code.add(self)
         
     def freeData(self):
         for r in self.rlist:
@@ -57,7 +55,8 @@ class Solver:
         self.bestCost = cost
         self.bestcars = copy.deepcopy(self.cars)
         self.bestrlist = copy.deepcopy(self.rlist)
-        # print("SetnewBest",cost) #uncomment this
+
+        print("SetnewBest",cost) 
     def getBest(self):
         return self.bestCost
         
@@ -100,13 +99,13 @@ def main(argTime,argFile):
     solver.initialSolution(1)
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
-    
+    Code.add(solver)
     print("----------------"*2)
     
-    #solver.tabu_search.findSolution()
-    # solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution2()
+    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution()
+    #solver.bestrlist,solver.bestcars = solver.tabu_search.VariableNeighbourhoud()
     
-    solver.bestrlist , solver.bestcars =solver.simulated_annealing.simulatedAnnealing()
+    #solver.bestrlist , solver.bestcars =solver.simulated_annealing.simulatedAnnealing()
     
     print("----------------"*2)
     
@@ -121,6 +120,6 @@ if __name__ == "__main__":
     # argTime=int(sys.argv[1])
     # argFile=sys.argv[2]
     argTime=300
-    argFile='./csv/210_5_44_25.csv'
+    argFile='./csv/210_5_33_25.csv'
     main(argTime,argFile)
     
