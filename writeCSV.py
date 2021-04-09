@@ -29,7 +29,7 @@ def writeCSV(solver,Car):
         writer.writerow(['+Assigned', 'requests'])
         for r in rlist:
             if(not(r.notAssigned)):
-                writer.writerow(["req"+str(r.id)] + [Car.carIDtoStr[r.car.id]])
+                writer.writerow(["req"+str(r.id)] + [Car.carIDtoStr[r.carID]])
                 
         writer.writerow(['+Unassigned', 'requests'])
         for r in rlist:

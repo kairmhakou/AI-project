@@ -14,11 +14,10 @@ class Car:
     zoneIDtoADJ = []
     def __init__(self):
         self.id = Car.id
-        Car.id += 1
-    
         self.res = [] #list of reservations assigned to this car
         self.zone = 0
         
+        Car.id += 1
     def inZone(self,r):
         if(self.zone == r.zone):
             return 1 # car is in the ideal zone for r
@@ -43,16 +42,34 @@ class Car:
             if(nres.overlap(r.start,r.end)):
                 tempr = self.res.pop(i)
                 #print("removed:",tempr.id)
-                tempr.car = None
+                tempr.setCar(-1)#None
                 tempr.notAssigned = True
                 tempr.adjZone =False
                 i-=1
             i+=1
-        nres.car = self
+        nres.setCar(self.id)#self
         nres.notAssigned = False
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres)
+        nres.assignCount+=1
         return 1
+    def setZone_old(self,zone):
+        self.zone= zone
+        i = 0
+        while(i<len(self.res)):
+            r = self.res[i]
+            if(r.zone == zone):
+                r.adjZone = False
+            elif(r.zone in Car.zoneIDtoADJ[zone]):
+                r.adjZone = True
+            else:
+                #DIT GAAT MOGELIJKS FOUT
+                r.adjZone = False
+                r.notAssigned = True
+                r.setCar(-1)#None
+                self.res.pop(i)
+                i-=1
+            i+=1
     def setZone(self,zone):
         self.zone= zone
         i = 0
@@ -66,11 +83,10 @@ class Car:
                 #DIT GAAT MOGELIJKS FOUT
                 r.adjZone = False
                 r.notAssigned = True
-                r.car = None
+                r.setCar(-1)#None
                 self.res.pop(i)
                 i-=1
-            i+=1
-            
+            i+=1        
     def code(self):
         return self.zone
     

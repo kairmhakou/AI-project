@@ -20,7 +20,12 @@ class Code:
         for c in solver.cars:
             ccode.append(c.code())
         return [rcode,ccode]
-    def add(ncode):
+    def add(solver):
+
+        ncode = Code.formCode(solver) 
+        solver.curcode = ncode
+        if(Code.inMemory(ncode)):
+            return 0
         #plaat op juiste plaats (gesorteerd)
         #bisect.insort(Code.passedCodes, c) 
     
@@ -37,7 +42,7 @@ class Code:
         else:
             Code.passedCodesPerL[lenC] = []
             Code.passedCodesPerL[lenC].append(c)  
-        
+        return 1
       
     def codeToStr(code):
         s = ''

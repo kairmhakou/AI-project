@@ -20,31 +20,30 @@ class Solver:
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
-        self.cars, self.rlist = readCSV(Car,Reservation,self.f)
+        self.cars, self.rlist,self.options = readCSV(Car,Reservation,self.f)
         
         self.tabu_search = Tabu_Search(self)
         self.simulated_annealing = Simulated_Annealing(self,Code,Car)
         
         
-        
+        """
         self.sorted_rlist = []
         for e in self.rlist:
             index = 0
             for i in self.sorted_rlist:
-                if(len(e.options)<len(i.options)):
+                if(len(self.options[e.id])<len(self.options[i.id])):
                     break
                 index+=1
-            self.sorted_rlist.insert(index,e)
-        
+            self.sorted_rlist.insert(index,e)"""
         self.bestCost = None
         self.bestcars = None
         self.bestrlist = None
         
         #base state of solution
-        self.curcode = Code.formCode(self)
-        Code.add(self.curcode)
+        Code.add(self)
         
     def freeData(self):
+        input("freedata")
         for r in self.rlist:
             r.car = None
             r.notAssigned=True
@@ -57,42 +56,66 @@ class Solver:
         self.bestCost = cost
         self.bestcars = copy.deepcopy(self.cars)
         self.bestrlist = copy.deepcopy(self.rlist)
-        print("SetnewBest",cost)
+
+        print("SetnewBest",cost) 
     def getBest(self):
         return self.bestCost
         
     def initialSolution(self,most_strict):
         if(most_strict):
-            l = self.sorted_rlist
+            l = self.rlist#sorted_rlist
         else:
             l = self.rlist
         for r in l:
             if(r.notAssigned):
-                for c in r.options:
+                for c in self.options[r.id]:
                         if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
                             c.addR(r)
                             break   
         for r in l:                
             if(r.notAssigned):#could not be assigned to any car
-                for c in r.options:
+                for c in self.options[r.id]:
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
                             c.addR(r)
                             break
         for r in l:                
             if(r.adjZone):#could not be assigned to any car
-                for c in r.options:
+                for c in self.options[r.id]:
                         if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
                             c.addR(r)
                             break
             if(r.adjZone):#could not be assigned to any car
-                for c in r.options:               
+                for c in self.options[r.id]:               
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
                             c.addR(r)
                             break
 
+    def printStuff(self):
+        for o in self.options:
+            for c in o:
+                print(c.id,end = " ")
+            print()
+        input()
     
+        for c in self.cars:
+            print(c.id)
+            print(c.res)
+            print(c.zone)
+        input()
+        for r in self.rlist:
+            print(r.id)
+            print(r.carID)
+            print(r.zone)
+            print(r.start)
+            print(r.end)
+            print(r.P1)
+            print(r.P2)
+            print(r.notAssigned)
+            print(r.adjZone)
+            print(r.assignCount)
+        input()
 def main(argTime,argFile):
     solver = Solver(argFile,argTime)
     Printer.printDict(Car)
@@ -100,17 +123,20 @@ def main(argTime,argFile):
     solver.initialSolution(1)
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
-    
+    Code.add(solver)
     print("----------------"*2)
     
-    #solver.tabu_search.findSolution()
-    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution2()
+    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution()
+    #solver.printStuff()
+    #solver.bestrlist,solver.bestcars = solver.tabu_search.VariableNeighbourhoud()
     
-    #solver.simulated_annealing.simulatedAnnealing()
+    #solver.bestrlist , solver.bestcars =solver.simulated_annealing.simulatedAnnealing()
     
     print("----------------"*2)
     
     solver.bestCost = Cost.getCost(solver.bestrlist)
+    print(Cost.getCost(solver.bestrlist))
+    # Printer.printResult(solver.bestrlist,solver.cars)
     writeCSV(solver,Car)
     Printer.printFinal(solver,Code)
     
@@ -118,5 +144,7 @@ def main(argTime,argFile):
 if __name__ == "__main__":
     argTime=int(sys.argv[1])
     argFile=sys.argv[2]
+    #argTime=300
+    #argFile='./csv/210_5_33_25.csv'
     main(argTime,argFile)
     
