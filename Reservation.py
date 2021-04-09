@@ -1,15 +1,16 @@
+from State import State
 class Reservation:
     id = 0
     resIDtoStr = {}
     zoneIDtoADJ = {}
-    def __init__(self,zone,day,start,duration,P1,P2):
+    def __init__(self,zone,day,start,duration,P1,P2,inc = 1):
         self.id = Reservation.id
-        Reservation.id += 1
+        Reservation.id += inc
         self.carID = -1#None
         self.zone = zone
-        
-        self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
-        self.end = self.start + int(duration) #cast day, start, duration from txt to int
+        if(day!=-1):
+            self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
+            self.end = self.start + int(duration) #cast day, start, duration from txt to int
         self.P1 = P1  # cost for not assigning Reservation
         self.P2 = P2  # cost for assigning to adjecent zone
         
@@ -17,10 +18,22 @@ class Reservation:
         self.adjZone = False #1 -> assigned to adjecent zone
         
         self.assignCount = 0
-    def getCar(self,solver):
+    def clone(self):
+        cloneRes = Reservation(self.zone,-1,self.start,-1,self.P1,self.P2,inc = 0)
+        cloneRes.notAssigned = self.notAssigned
+        cloneRes.adjZone = self.adjZone
+        cloneRes.assignCount = self.assignCount
+
+        cloneRes.start = self.start
+        cloneRes.end = self.end
+        
+        cloneRes.carID = self.carID
+        cloneRes.id = self.id
+        return cloneRes
+    def getCar(self):
         if(self.carID == -1):
             return None
-        return solver.cars[self.carID]
+        return State.cars[self.carID]
         #return self.car
     
     def setCar(self,car):
@@ -49,7 +62,7 @@ class Reservation:
             return 'x'
         return self.carID
         #return self.car
-    
+    """
     def __str__(self):
         s = str(self.id)+ " "
         s += Reservation.resIDtoStr[self.id]
@@ -60,6 +73,6 @@ class Reservation:
         if(self.car):
             s+=str(self.car)#.id)
         return s
-
+    """
 if __name__ == "__main__":
     pass

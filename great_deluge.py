@@ -18,7 +18,7 @@ class Great_deluge:
         while(b<120):
             print('wet -------------')
             solver2.freeData()
-            solver2.initialSolution(1)
+            self.tempSolution(solver2)
             cost = Cost.getCost(solver2.rlist)
             print(cost)
             b+=1
@@ -37,3 +37,34 @@ class Great_deluge:
         print(' we are dry')
         return self.solver
         print(a)
+    
+    def tempSolution(self,solver2):
+
+        l = solver2.rlist
+        random.shuffle(l)
+        for r in l:
+            if(r.notAssigned):
+                for c in solver2.options[r.id]:
+                        if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
+                            c.addR(r)
+                            break   
+        for r in l:                
+            if(r.notAssigned):#could not be assigned to any car
+                for c in solver2.options[r.id]:
+                        if(len(c.res)==0):#No other reservations so no problem
+                            c.setZone(r.zone)
+                            c.addR(r)
+                            break
+        for r in l:                
+            if(r.adjZone):#could not be assigned to any car
+                for c in solver2.options[r.id]:
+                        if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
+                            c.addR(r)
+                            break
+            if(r.adjZone):#could not be assigned to any car
+                for c in solver2.options[r.id]:               
+                        if(len(c.res)==0):#No other reservations so no problem
+                            c.setZone(r.zone)
+                            c.addR(r)
+                            break
+

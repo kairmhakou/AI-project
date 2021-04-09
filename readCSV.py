@@ -77,7 +77,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         OptionalCars = []
     
         for o in res[5]:
-            OptionalCars.append(cars[Car.carStrtoID[o]])
+            OptionalCars.append(Car.carStrtoID[o])
         options.append(OptionalCars)    
         r = Reservation(zone,day,startTime,duration,P1,P2)
     

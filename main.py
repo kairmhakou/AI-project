@@ -13,19 +13,21 @@ from Code import Code
 from Printer import Printer
 from tabu_search import Tabu_Search
 from simulated_annealing import Simulated_Annealing
-
-
+from great_deluge import Great_deluge
+from State import State
+class Methods():
+    def __init__(self,solver):
+        self.tabu_search = Tabu_Search(solver)
+        self.simulated_annealing = Simulated_Annealing(solver,Code,Car)
+        self.great_deluge = Great_deluge(solver)
 class Solver:
     def __init__(self,f,maxtime, random_seed = 10):
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
-        self.cars, self.rlist,self.options = readCSV(Car,Reservation,self.f)
-        
-        self.tabu_search = Tabu_Search(self)
-        self.simulated_annealing = Simulated_Annealing(self,Code,Car)
-        
-        
+        self.cars2, self.rlist2,self.options = readCSV(Car,Reservation,self.f)
+        State.cars = self.cars2
+        State.rlist = self.rlist2
         """
         self.sorted_rlist = []
         for e in self.rlist:
@@ -42,96 +44,81 @@ class Solver:
         #base state of solution
         Code.add(self)
         
+    def createCopy(self):
+        copySolver = Solver(self.f,self.maxtime)
+        copySolver.cars = copy.deepcopy(self.cars)#[copy.deepcopy(c) for c in self.cars]        
+        copySolver.rlist = copy.deepcopy(self.rlist)#[copy.deepcopy(r) for r in self.rlist] 
+
+        copySolver.options = self.options
+        copySolver.bestCost = self.bestCost
+        return copySolver
     def freeData(self):
-        input("freedata")
-        for r in self.rlist:
+        for r in State.rlist:
             r.car = None
             r.notAssigned=True
             r.adjZone=False
         for c in self.cars:
             c.res=[]
             
-    def setBest(self,):
-        cost = Cost.getCost(self.rlist)
+    def setBest(self):
+        cost = Cost.getCost(State.rlist)
         self.bestCost = cost
-        self.bestcars = copy.deepcopy(self.cars)
-        self.bestrlist = copy.deepcopy(self.rlist)
+        self.bestcars = copy.deepcopy(State.cars)
+        self.bestrlist = copy.deepcopy(State.rlist)
 
         print("SetnewBest",cost) 
     def getBest(self):
         return self.bestCost
         
-    def initialSolution(self,most_strict):
-        if(most_strict):
-            l = self.rlist#sorted_rlist
-        else:
-            l = self.rlist
-        for r in l:
+    def initialSolution(self):
+        for r in State.rlist:
             if(r.notAssigned):
-                for c in self.options[r.id]:
+                for cid in self.options[r.id]:
+                        c = State.cars[cid]
                         if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
                             c.addR(r)
                             break   
-        for r in l:                
+        for r in State.rlist:                
             if(r.notAssigned):#could not be assigned to any car
-                for c in self.options[r.id]:
+                for cid in self.options[r.id]:
+                        c = State.cars[cid]
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
                             c.addR(r)
                             break
-        for r in l:                
+        for r in State.rlist:                
             if(r.adjZone):#could not be assigned to any car
-                for c in self.options[r.id]:
+                for cid in self.options[r.id]:
+                        c = State.cars[cid]
                         if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
                             c.addR(r)
                             break
             if(r.adjZone):#could not be assigned to any car
-                for c in self.options[r.id]:               
+                for cid in self.options[r.id]:    
+                        c = State.cars[cid]           
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
                             c.addR(r)
                             break
 
-    def printStuff(self):
-        for o in self.options:
-            for c in o:
-                print(c.id,end = " ")
-            print()
-        input()
-    
-        for c in self.cars:
-            print(c.id)
-            print(c.res)
-            print(c.zone)
-        input()
-        for r in self.rlist:
-            print(r.id)
-            print(r.carID)
-            print(r.zone)
-            print(r.start)
-            print(r.end)
-            print(r.P1)
-            print(r.P2)
-            print(r.notAssigned)
-            print(r.adjZone)
-            print(r.assignCount)
-        input()
+
 def main(argTime,argFile):
     solver = Solver(argFile,argTime)
+    methods = Methods(solver)
     Printer.printDict(Car)
     
-    solver.initialSolution(1)
+    solver.initialSolution()
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
     Code.add(solver)
-    print("----------------"*2)
+    print("----------------"*2)    
     
-    solver.bestrlist,solver.bestcars = solver.tabu_search.findSolution()
-    #solver.printStuff()
-    #solver.bestrlist,solver.bestcars = solver.tabu_search.VariableNeighbourhoud()
+    solver.bestrlist,solver.bestcars = methods.tabu_search.findSolution()
+    #solver.bestrlist,solver.bestcars = methods.tabu_search.VariableNeighbourhoud()
     
-    #solver.bestrlist , solver.bestcars =solver.simulated_annealing.simulatedAnnealing()
+    #solver.bestrlist , solver.bestcars =methods.simulated_annealing.simulatedAnnealing()
     
+    #methods.great_deluge.staydry(Cost.getCost(solver.rlist)/20)
     print("----------------"*2)
     
     solver.bestCost = Cost.getCost(solver.bestrlist)
