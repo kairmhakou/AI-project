@@ -17,6 +17,7 @@ from Code import Code
 import time
 import math
 from Car import Car
+from State import State
 #global variables
 START_TEMPRATURE = 100
 END_TEMPRATURE= 10
@@ -26,66 +27,67 @@ COOLING_RATE = 0.99
 class Simulated_Annealing:
     def __init__(self,solver,Code, Car):
         self.solver = solver
-        
+        # self.sortedResPen = self.sort(State.rlist)
+        self.timeSpent = 0
+        self.deepCount = 0
     
-    
-    def steepest_descent(self):
-        bestc = None
-        bestz = None
-        bestr = None
-        best = 0 #verbetering >0
+    def hill_climbing_zonder_zones(self):
         #All possible 'assigned car' swaps
-        for r in self.solver.rlist:
-        # for r in self.sort(self.solver.rlist):
-        # for r in self.solver.sorted_rlist:
 
-            for c in r.options:
+        for r in State.rlist:
+            for c in self.solver.options[r.id]:
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
+                    
                     cost =  Cost.costToAddR(c,r)
-                    if(cost>best):
-                        best = cost
-                        bestc = c
-                        bestr = r
-        
-        # for r in self.solver.rlist:
-            
-        #     if(r.notAssigned):
-        #         print(r.id)
-        # print("cars")
-        # for c in self.solver.cars:
-        #     if(c.res == None):
-        #         print(c.id)
-
-
-        # for c in self.solver.cars:
-        #     for r in c.res:
-        #         cost =  Cost.costToSetZone(c,r.zone)
-        #         #print("zoneCost:",cost)
-        #         if(cost>best):
-        #             best = cost
-        #             bestc = c
-        #             bestz = r.zone
-        
-        
-        # for r in self.solver.rlist:
-        #     if(r.notAssigned):
-        #         for c in r.options:
-        #                 if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
-        #                     c.addR(r)
-        #                     break
-
-        return bestc ,bestz,bestr, best
-    
+                    #print(cost)
+                    if(cost>0):#any improvement
+                        #print(r.id,":",c.id)
+                        return c,None,r
+        return None,None,None
     def hill_climbing(self):
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
-        for r in self.solver.rlist:
-            for c in r.options:
+        for r in State.rlist:
+    
+            for cid in self.solver.options[r.id]:
+                c = State.cars[cid]
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
-                    cost =  Cost.costToAddR(c,r)
+                    cost = Cost.costToAddR(c,r)
                     if(cost>best):
+                        #nextcode = copy.deepcopy(self.solver.curcode)
+                        nextcode = Code.formCode(self.solver) 
+                        for temprid in c.res:
+                            tempr = State.rlist[temprid]
+                            if(r.overlap(tempr.start,tempr.end)):
+                                #overlap => r zou moeten worden verwijderd
+                                nextcode[0][tempr.id]='x'
+                        nextcode[0][r.id]=c.id
+                        if(Code.inMemory(nextcode)):
+                            continue
                         return c,None,r
-        
+            
+        #All sensible 'car zone' swaps
+        for c in State.cars:          
+            for rid in c.res:
+                r = State.rlist[rid]
+                cost =  Cost.costToSetZone(c,r.zone)
+                #print("zoneCost:",cost)
+                if(cost>best):
+                    
+                    #nextcode = copy.deepcopy(self.solver.curcode)
+                    nextcode = Code.formCode(self.solver) 
+                    nextcode[1][c.id] = r.zone 
+                    for temprid in c.res:
+                        tempr = State.rlist[temprid]
+                        if(tempr.zone == r.zone):
+                            pass
+                        elif(tempr.zone in Car.zoneIDtoADJ[r.zone]):
+                            pass
+                        else:
+                            nextcode[0][tempr.id]='x'
+                    if(Code.inMemory(nextcode)):
+                        continue
+                    return c,r.zone,None
         
         return None,None,None
 
@@ -96,44 +98,37 @@ class Simulated_Annealing:
             count += 1
             #pick one of the local search methods
             if(steepest_descent):
-                bestc,bestz,bestr,bestCost = self.steepest_descent()
+                pass#bestc,bestz,bestr,bestCost = self.steepest_descent()
             else:
                 bestc,bestz,bestr = self.hill_climbing()
-           
-            # self.start(0)
-            # self.forceAssign()
+
+
             if(bestz is not None):
                 bestc.setZone(bestz)
             elif(bestr is not None):
-                if(self.solver.rlist[bestr.id].car):#if currently assigned to a car, remove from list
-                    self.solver.rlist[bestr.id].car.res.remove(self.solver.rlist[bestr.id])
+                if(bestr.getCar()):#if currently assigned to a car, remove from list
+                    bestr.getCar().res.remove(bestr.id)
                 #assign to new car
-                self.solver.cars[bestc.id].addR(self.solver.rlist[bestr.id])
+                bestc.addR(bestr)
             else:
                 #reached peak
                 return count
     
-    def start(self,most_strict):
-        if(most_strict):
-            l = self.solver.sorted_rlist
-        else:
-            l = self.solver.rlist
-        for r in l:
-            if(r.notAssigned):
-                for c in r.options:
-                        if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
-                            c.addR(r)
-                            break            
+       
             
     def simulatedAnnealing(self):
+
         
-        currReservationList = copy.deepcopy(self.solver.rlist)
-        currCarList= copy.deepcopy(self.solver.cars) 
-        currCost = Cost.getCost(self.solver.rlist)
+        resultRlist,resultCars = copy.deepcopy(State.rlist), copy.deepcopy(State.cars)
+        result = 999999999999999
+        
+        currCost = Cost.getCost(State.rlist)
+        State.backup(Cost.getCost(State.rlist))
+        
         start = time.perf_counter()
 
         # sortedListP
-        # sortedResPen=self.sort(self.solver.rlist)
+        # sortedResPen=self.sort(State.rlist)
         # for r in self.sortedResPen:
         #     print(r.P1)
 
@@ -161,86 +156,85 @@ class Simulated_Annealing:
                 checkBest = self.solver.getBest()
                 i =0 
                 while(i < NUM_ITERATIONS):
-                    print("----the start")
-                    Printer.printCars(self.solver.cars)
-                    tempcars = copy.deepcopy(self.solver.cars)
                     if((time.perf_counter()-start) > self.solver.maxtime):
                         print('~~timeisup~~')
                         break   #return because the time is up
                     
-                    # for j in range(random.randint(1, len(self.solver.cars))):
-                    while (1):
+                    # for j in range(random.randint(1, len(State.cars))):
+                    for _ in range(1):
                         randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
-                        randomCarIndex = random.randint(0, len(self.solver.cars)-1)
-                        if(self.solver.cars[randomCarIndex].zone == randomZoneIndex):
+                        randomCarIndex = random.randint(0, len(State.cars)-1)
+                        if(State.cars[randomCarIndex].zone == randomZoneIndex):
                             continue
-                        # c1 = self.solver.cars[randomCarIndex]
-                        # c1.setZone(randomZoneIndex)
-                        self.solver.cars[randomCarIndex].setZone(randomZoneIndex)
-                        break
-                    print("car ", randomCarIndex, " zone ",randomZoneIndex )
-                    print("--after changing the zone ")
-                    Printer.printCars(self.solver.cars)
+                        c1 = State.cars[randomCarIndex]
+                        c1.setZone(randomZoneIndex)
+ 
+                    self.localSearch()
+                    newCost= Cost.getCost(State.rlist)
+                    #print(newCost)
+                    #print(newCost, " ",currCost, randomZoneIndex, randomCarIndex)
+                    diff = newCost - currCost                    
+                    #input(diff)
                     
-                    self.localSearch(1)
-                    newCost= Cost.getCost(self.solver.rlist)
-                    print("--after the local search------- ")
-                    Printer.printCars(self.solver.cars)
-                    # print(newCost, " ",currCost, randomZoneIndex, randomCarIndex)
-                    diff = newCost - currCost
                     
                     if diff < 0:
+                        
                         #print("diff < 0" , newCost , diff, self.solver.getBest())
                         # print("new peak")
-                        # currReservationList = copy.deepcopy(self.solver.rlist)
-                        # currCarList= copy.deepcopy(self.solver.cars) 
-                        # currCost = Cost.getCost(self.solver.rlist)
                         
+                        tempstart = time.perf_counter()
+			
+                        #saveSolver = copy.deepcopy(self.solver)
                         
-                        if(currCost<self.solver.getBest()):
+                        State.backup(Cost.getCost(State.rlist))
+                        
+                        self.timeSpent += time.perf_counter()- tempstart
+                        self.deepCount +=1
+                        currCost = Cost.getCost(State.rlist)
+                        
+                        currCost = newCost
+                        if(newCost<self.solver.getBest()):
                             # print("new best cost")
-                            bestR = copy.deepcopy(self.solver.rlist)
-                            bestC = copy.deepcopy(self.solver.cars)
+                            
+                            tempstart = time.perf_counter()
+			
+ 
+                            
+
+                            self.timeSpent += time.perf_counter()- tempstart
+                            self.deepCount +=1
                             bestCost = currCost
                             self.solver.setBest() #print the setNewBest
-                    
+                            if(newCost<result):
+                                #bestSolver = copy.deepcopy(self.solver)
+                                resultRlist,resultCars = copy.deepcopy(State.rlist), copy.deepcopy(State.cars)
+                                result = newCost
                     else:
                         
-                        probability= math.exp(-(diff/t))
-                        
-                        
-                        
+                        probability= math.exp(-((diff)/t))
+                        #print(probability)
                         if(random.uniform(0,1) < probability):
                             # print("probability" , probability)
                             if(probability<minProbability):
                                 minProbability =probability
-                            # currReservationList = copy.deepcopy(self.solver.rlist)
-                            # currCarList= copy.deepcopy(self.solver.cars) 
-                            # currCost = Cost.getCost(self.solver.rlist)
-                    
+                            
+                            tempstart = time.perf_counter()
+                        
+                            #saveSolver = copy.deepcopy(self.solver)
+                            State.backup(Cost.getCost(State.rlist))
+                            self.timeSpent += time.perf_counter()- tempstart
+                            self.deepCount +=1
+                            
+                            currCost = newCost
                         else:
                             # coolCounter += 0.00001
-                            # print("---------------current ------")
-                            # Printer.printCars(currCarList)
-                            # print("---------------selfsolver ------")
-                            # Printer.printCars(self.solver.cars)
-                            # self.solver.rlist =copy.deepcopy(currReservationList) 
-                            # self.solver.cars =copy.deepcopy(currCarList)
-                            
-                            # print("---------------after ------")
-                            # Printer.printCars(self.solver.cars)
-                            print("---- before temp")
-                            Printer.printCars(self.solver.cars)
-                            print("----  temp")
-                            Printer.printCars(tempcars)
-                            self.solver.cars = copy.deepcopy(tempcars)
-                            print("---- after temp")
-                            Printer.printCars(self.solver.cars)
-                            
-                    
-                    """ if(i == NUM_ITERATIONS/2 and checkBest == bestCost):
-                        self.cars = bestR
-                        # break """
+                            tempstart = time.perf_counter()
+                            #self.solver = copy.deepcopy(saveSolver)
+                            State.restore()
+                            currCost = Cost.getCost(State.rlist)
+                            self.timeSpent += time.perf_counter()- tempstart
+                            self.deepCount +=1
+
                     i += 1
                     # checkBest = self.solver.getBest()
                 t *= COOLING_RATE
@@ -248,7 +242,7 @@ class Simulated_Annealing:
                 tempratureList.append(t)
                 probabilityList.append(minProbability)
                 
-                print("t" , t ," cost " ,Cost.getCost(self.solver.rlist) , self.solver.getBest())
+                print("t" , t ," cost " ,"best:",result,"current",newCost,"Backup",State.backupCost)
         
         """ plt.figure(1)
         plt.plot( probabilityList, tempratureList, 'bo')
@@ -257,7 +251,10 @@ class Simulated_Annealing:
         plt.figure(2)
         plt.plot(probabilityList)
         plt.show() """
-        return bestR , bestC
+        print("timeSpent:",self.timeSpent)
+        print("timeSpent:",self.timeSpent)
+        print("timeSpent:",self.deepCount)
+        return resultRlist , resultCars
     def sort(self,array):
         if len(array)<2:
             return array
@@ -274,45 +271,3 @@ class Simulated_Annealing:
                 same.append(r)
 
         return self.sort(high) + same + self.sort(low)
-    def forceAssign(self):
-            minL = 99999999999
-            bestc = None
-            bestr = None
-
-            for r in self.solver.rlist:
-                if(r.notAssigned):
-                    for c in r.options:
-                        if(len(c.res)<minL):
-                            nextcode = copy.deepcopy(self.solver.curcode)
-
-                            #addR and setZone will remove conflicts: r not in zone/adjZone, overlap
-                            for tempr in c.res:
-                                #tempr not in zone/adjZone
-                                if(not(tempr.zone == r.zone or tempr.zone in Car.zoneIDtoADJ[r.zone])):
-                                    nextcode[0][tempr.id] = 'x' #r can no longer assigned
-                                #overlap
-                                elif(r.overlap(tempr.start,tempr.end)):
-                                    nextcode[0][tempr.id] = 'x'
-                            
-                            nextcode[0][r.id] = c.id #r would be assign to c (addR)
-                            nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
-                            if(Code.inMemory(nextcode)):
-                                continue
-
-                            minL = len(c.res)
-                            bestc = c
-                            bestr = r
-            if(bestr):                
-                bestc.setZone(bestr.zone)
-                bestc.addR(bestr)
-                code = Code.formCode(self.solver)
-                self.solver.curcode = code
-                
-                if(Code.inMemory(code)):
-                    print("iets fout met nextcode in forceAssign")
-                else:
-                    Code.add(code)
-                return 1
-            else:    
-                print("No Forced assign")
-                return 0

@@ -55,6 +55,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         j+=1
         
     k = 0
+    options = []
     for res in reservationList:
         ID = res[0]
         zone = Car.zoneStrtoID[res[1]]
@@ -72,15 +73,17 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         but are slower than lists when it comes to iterating over their contents.
         
         """
-        optionSet = []
+	
+        OptionalCars = []
     
         for o in res[5]:
-            optionSet.append(cars[Car.carStrtoID[o]])
-        OptionalCars = optionSet
-        r = Reservation(zone,day,startTime,duration,P1,P2,OptionalCars)
+            OptionalCars.append(Car.carStrtoID[o])
+        options.append(OptionalCars)    
+        r = Reservation(zone,day,startTime,duration,P1,P2)
+    
         reservatieLijst.append(r) 
         #Kost.voegtoe(r)
         Reservation.resIDtoStr[k] = ID
            
         k+=1
-    return cars, reservatieLijst
+    return cars, reservatieLijst,options

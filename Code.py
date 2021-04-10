@@ -9,18 +9,24 @@ Created on Sun Mar 14 14:03:22 2021
 To Do: Vervang bisect.insort door gwn een loop 
 """
 import bisect  
+from State import State
 class Code:
     memCount = 0
     #passedCodes = [] #split single list of all passed codes into dictionary of lists divided based on len(code)
     passedCodesPerL = {}
     def formCode(solver,):
         rcode,ccode = [],[]
-        for r in solver.rlist:
+        for r in State.rlist:
             rcode.append(r.code())
-        for c in solver.cars:
+        for c in State.cars:
             ccode.append(c.code())
         return [rcode,ccode]
-    def add(ncode):
+    def add(solver):
+
+        ncode = Code.formCode(solver) 
+        solver.curcode = ncode
+        if(Code.inMemory(ncode)):
+            return 0
         #plaat op juiste plaats (gesorteerd)
         #bisect.insort(Code.passedCodes, c) 
     
@@ -37,7 +43,7 @@ class Code:
         else:
             Code.passedCodesPerL[lenC] = []
             Code.passedCodesPerL[lenC].append(c)  
-        
+        return 1
       
     def codeToStr(code):
         s = ''

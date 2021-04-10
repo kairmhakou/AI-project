@@ -1,28 +1,40 @@
 python main.py 300 ./csv/100_5_14_25.csv
-
 python main.py 300 ./csv/100_5_19_25.csv 
-
 python main.py 300 ./csv/210_5_33_25.csv 
-
 python main.py 300 ./csv/210_5_44_25.csv 
-
 python main.py 300 ./csv/360_5_71_25.csv 
 
-python main.py 1 ./csv/toy1.csv 
-
-
-
 java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution.csv
-
 java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution.csv
-
 java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution.csv
-
 java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution.csv
-
 java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution.csv
 
+python main.py 1 ./csv/toy1.csv 
 java -jar validator.jar ./csv/toy1.csv ./csv_solutions/toy1_solution.csv
 
 
+Beste van studenten vorige jaren:
+8784
+5818
+10425
+4210
+7655
 
+Karim(30sec, 1 random geen average):
+9545
+6695
+12500
+6520
+12835
+
+
+Loic(30sec):
+9365
+6705
+12920
+6585
+13
+
+Jorne:
+Nog ni getest
