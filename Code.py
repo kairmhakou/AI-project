@@ -14,7 +14,7 @@ class Code:
     memCount = 0
     #passedCodes = [] #split single list of all passed codes into dictionary of lists divided based on len(code)
     passedCodesPerL = {}
-    def formCode(solver,):
+    def formCode():
         rcode,ccode = [],[]
         for r in State.rlist:
             rcode.append(r.code())
@@ -22,8 +22,7 @@ class Code:
             ccode.append(c.code())
         return [rcode,ccode]
     def add(solver):
-
-        ncode = Code.formCode(solver) 
+        ncode = Code.formCode() 
         solver.curcode = ncode
         if(Code.inMemory(ncode)):
             return 0
@@ -73,7 +72,7 @@ class Code:
         """
         op basis van de lengtes moet er vaak niet eens gezocht worden door de memory
             De code bestaat uit ids
-            De id kunnen elk 1/2/3 lang zijn
+            De id's kunnen elk 1/2/3 lang zijn
             Voor elk van de 360 reservaties staat er een id in de code
             => lage kans dat twee verschillende code dezelfde lengte hebben
         => moeten meestal niet zoeken door een lijst van duizende code

@@ -18,16 +18,15 @@ from State import State
 class Methods():
     def __init__(self,solver):
         self.tabu_search = Tabu_Search(solver)
-        self.simulated_annealing = Simulated_Annealing(solver,Code,Car)
+        self.simulated_annealing = Simulated_Annealing(solver.maxtime)
         self.great_deluge = Great_deluge(solver)
 class Solver:
     def __init__(self,f,maxtime, random_seed = 10):
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
-        self.cars2, self.rlist2,self.options = readCSV(Car,Reservation,self.f)
-        State.cars = self.cars2
-        State.rlist = self.rlist2
+        State.cars, State.rlist,State.options = readCSV(Car,Reservation,self.f)
+
         """
         self.sorted_rlist = []
         for e in self.rlist:
@@ -44,14 +43,6 @@ class Solver:
         #base state of solution
         Code.add(self)
         
-    def createCopy(self):
-        copySolver = Solver(self.f,self.maxtime)
-        copySolver.cars = copy.deepcopy(self.cars)#[copy.deepcopy(c) for c in self.cars]        
-        copySolver.rlist = copy.deepcopy(self.rlist)#[copy.deepcopy(r) for r in self.rlist] 
-
-        copySolver.options = self.options
-        copySolver.bestCost = self.bestCost
-        return copySolver
     def freeData(self):
         for r in State.rlist:
             r.car = None
@@ -73,14 +64,14 @@ class Solver:
     def initialSolution(self):
         for r in State.rlist:
             if(r.notAssigned):
-                for cid in self.options[r.id]:
+                for cid in State.options[r.id]:
                         c = State.cars[cid]
                         if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
                             c.addR(r)
                             break   
         for r in State.rlist:                
             if(r.notAssigned):#could not be assigned to any car
-                for cid in self.options[r.id]:
+                for cid in State.options[r.id]:
                         c = State.cars[cid]
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
@@ -88,13 +79,13 @@ class Solver:
                             break
         for r in State.rlist:                
             if(r.adjZone):#could not be assigned to any car
-                for cid in self.options[r.id]:
+                for cid in State.options[r.id]:
                         c = State.cars[cid]
                         if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
                             c.addR(r)
                             break
             if(r.adjZone):#could not be assigned to any car
-                for cid in self.options[r.id]:    
+                for cid in State.options[r.id]:    
                         c = State.cars[cid]           
                         if(len(c.res)==0):#No other reservations so no problem
                             c.setZone(r.zone)
@@ -105,7 +96,7 @@ class Solver:
 def main(argTime,argFile):
     solver = Solver(argFile,argTime)
     methods = Methods(solver)
-    Printer.printDict(Car)
+    #Printer.printDict(Car)
     
     solver.initialSolution()
     #Printer.printResult(solver.rlist,solver.cars)
@@ -113,10 +104,10 @@ def main(argTime,argFile):
     Code.add(solver)
     print("----------------"*2)    
     
-    solver.bestrlist,solver.bestcars = methods.tabu_search.findSolution()
+    #solver.bestrlist,solver.bestcars = methods.tabu_search.findSolution()
     #solver.bestrlist,solver.bestcars = methods.tabu_search.VariableNeighbourhoud()
     
-    #solver.bestrlist , solver.bestcars =methods.simulated_annealing.simulatedAnnealing()
+    solver.bestrlist , solver.bestcars = methods.simulated_annealing.simulatedAnnealing()
     
     #methods.great_deluge.staydry(Cost.getCost(solver.rlist)/20)
     print("----------------"*2)
