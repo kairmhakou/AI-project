@@ -7,6 +7,7 @@ Created on Tue Mar 23 22:46:11 2021
 # """
 # #%%
 # from main import Solver
+from Printer import Printer
 import random
 import copy
 
@@ -25,7 +26,7 @@ COOLING_RATE = 0.99
 class Simulated_Annealing:
     def __init__(self,solver,Code, Car):
         self.solver = solver
-        # self.sortedResPen = self.sort(self.solver.rlist)
+        
     
     
     def steepest_descent(self):
@@ -73,7 +74,7 @@ class Simulated_Annealing:
         #                     c.addR(r)
         #                     break
 
-        return bestc,bestz,bestr, best
+        return bestc ,bestz,bestr, best
     
     def hill_climbing(self):
         best = 0 #verbetering >0
@@ -104,10 +105,10 @@ class Simulated_Annealing:
             if(bestz is not None):
                 bestc.setZone(bestz)
             elif(bestr is not None):
-                if(bestr.car):#if currently assigned to a car, remove from list
-                    bestr.car.res.remove(bestr)
+                if(self.solver.rlist[bestr.id].car):#if currently assigned to a car, remove from list
+                    self.solver.rlist[bestr.id].car.res.remove(self.solver.rlist[bestr.id])
                 #assign to new car
-                bestc.addR(bestr)
+                self.solver.cars[bestc.id].addR(self.solver.rlist[bestr.id])
             else:
                 #reached peak
                 return count
@@ -160,6 +161,9 @@ class Simulated_Annealing:
                 checkBest = self.solver.getBest()
                 i =0 
                 while(i < NUM_ITERATIONS):
+                    print("----the start")
+                    Printer.printCars(self.solver.cars)
+                    tempcars = copy.deepcopy(self.solver.cars)
                     if((time.perf_counter()-start) > self.solver.maxtime):
                         print('~~timeisup~~')
                         break   #return because the time is up
@@ -170,29 +174,33 @@ class Simulated_Annealing:
                         randomCarIndex = random.randint(0, len(self.solver.cars)-1)
                         if(self.solver.cars[randomCarIndex].zone == randomZoneIndex):
                             continue
-                        c1 = self.solver.cars[randomCarIndex]
-                        c1.setZone(randomZoneIndex)
+                        # c1 = self.solver.cars[randomCarIndex]
+                        # c1.setZone(randomZoneIndex)
+                        self.solver.cars[randomCarIndex].setZone(randomZoneIndex)
                         break
-                        
+                    print("car ", randomCarIndex, " zone ",randomZoneIndex )
+                    print("--after changing the zone ")
+                    Printer.printCars(self.solver.cars)
                     
                     self.localSearch(1)
                     newCost= Cost.getCost(self.solver.rlist)
-                    
+                    print("--after the local search------- ")
+                    Printer.printCars(self.solver.cars)
                     # print(newCost, " ",currCost, randomZoneIndex, randomCarIndex)
                     diff = newCost - currCost
                     
                     if diff < 0:
                         #print("diff < 0" , newCost , diff, self.solver.getBest())
                         # print("new peak")
-                        currReservationList = copy.deepcopy(self.solver.rlist)
-                        currCarList= copy.deepcopy(self.solver.cars) 
-                        currCost = Cost.getCost(self.solver.rlist)
+                        # currReservationList = copy.deepcopy(self.solver.rlist)
+                        # currCarList= copy.deepcopy(self.solver.cars) 
+                        # currCost = Cost.getCost(self.solver.rlist)
                         
                         
                         if(currCost<self.solver.getBest()):
                             # print("new best cost")
-                            bestR = copy.deepcopy(currReservationList)
-                            bestC = copy.deepcopy(currCarList)
+                            bestR = copy.deepcopy(self.solver.rlist)
+                            bestC = copy.deepcopy(self.solver.cars)
                             bestCost = currCost
                             self.solver.setBest() #print the setNewBest
                     
@@ -206,14 +214,29 @@ class Simulated_Annealing:
                             # print("probability" , probability)
                             if(probability<minProbability):
                                 minProbability =probability
-                            currReservationList = copy.deepcopy(self.solver.rlist)
-                            currCarList= copy.deepcopy(self.solver.cars) 
-                            currCost = Cost.getCost(self.solver.rlist)
+                            # currReservationList = copy.deepcopy(self.solver.rlist)
+                            # currCarList= copy.deepcopy(self.solver.cars) 
+                            # currCost = Cost.getCost(self.solver.rlist)
                     
                         else:
                             # coolCounter += 0.00001
-                            self.rlist =copy.deepcopy(currReservationList) 
-                            self.cars =copy.deepcopy(currCarList)
+                            # print("---------------current ------")
+                            # Printer.printCars(currCarList)
+                            # print("---------------selfsolver ------")
+                            # Printer.printCars(self.solver.cars)
+                            # self.solver.rlist =copy.deepcopy(currReservationList) 
+                            # self.solver.cars =copy.deepcopy(currCarList)
+                            
+                            # print("---------------after ------")
+                            # Printer.printCars(self.solver.cars)
+                            print("---- before temp")
+                            Printer.printCars(self.solver.cars)
+                            print("----  temp")
+                            Printer.printCars(tempcars)
+                            self.solver.cars = copy.deepcopy(tempcars)
+                            print("---- after temp")
+                            Printer.printCars(self.solver.cars)
+                            
                     
                     """ if(i == NUM_ITERATIONS/2 and checkBest == bestCost):
                         self.cars = bestR

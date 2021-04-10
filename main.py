@@ -98,7 +98,7 @@ def main(argTime,argFile):
     Printer.printDict(Car)
     
     solver.initialSolution(1)
-    #Printer.printResult(solver.rlist,solver.cars)
+    Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
     
     print("----------------"*2)
@@ -120,7 +120,7 @@ def main(argTime,argFile):
 if __name__ == "__main__":
     # argTime=int(sys.argv[1])
     # argFile=sys.argv[2]
-    argTime=300
-    argFile='./csv/210_5_44_25.csv'
+    argTime=200000000000000000000000000000
+    argFile='./csv/toy1.csv'
     main(argTime,argFile)
     

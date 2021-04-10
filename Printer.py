@@ -14,6 +14,10 @@ class Printer:
         for r in rlist:
             print('   ',r)
             print('   ',r.notAssigned,r.adjZone)
+    def printCars(cars):
+        print('Cars:')
+        for c in cars:
+            print('   ',c)
     def printDict(Car):
         print('Dictionaries:')  
         print('   carIDtoStr',Car.carIDtoStr)
