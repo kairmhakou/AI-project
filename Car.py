@@ -12,6 +12,8 @@ class Car:
     zoneIDtoStr = {}
     zoneStrtoID = {}
     zoneIDtoADJ = []
+    
+    
     def __init__(self,inc = 1):
         self.id = Car.id
         self.res = [] #list of reservations assigned to this car
@@ -37,15 +39,15 @@ class Car:
             return 0 # r cannot be assigned to c unless c.zone is changed
     def overlap(self,start,end):
         for rID in self.res:
-            print(rID,len(State.rlist))
             r = State.rlist[rID]
             if(r.overlap(start,end)):
                 return True
         return False
 
     def addR(self,nres):
-        if(not(nres.zone == self.zone or nres.zone in Car.zoneIDtoADJ[self.zone])):
-            print("cannot add to car in this zone")
+        if(not(nres.zone == self.zone or self.zone in Car.zoneIDtoADJ[nres.zone])):#self.zone
+            
+            print("cannot add to car in this zone",self.zone,nres.zone,Car.zoneIDtoADJ[nres.zone],Car.zoneIDtoADJ[self.zone])
             return 0
         i = 0
         while(i<len(self.res)):
@@ -54,7 +56,6 @@ class Car:
             if(nres.overlap(r.start,r.end)):
                 temprID = self.res.pop(i)
                 tempr = State.rlist[temprID]
-                #print("removed:",tempr.id)
                 tempr.setCar(-1)#None
                 tempr.notAssigned = True
                 tempr.adjZone =False
@@ -64,7 +65,9 @@ class Car:
         nres.notAssigned = False
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres.id)
-        nres.assignCount+=1
+
+        State.RassignCount[nres.id]+=1
+
         return 1
 
     def setZone(self,zone):

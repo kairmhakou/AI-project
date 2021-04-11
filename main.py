@@ -12,21 +12,22 @@ from Cost import Cost
 from Code import Code
 from Printer import Printer
 from tabu_search import Tabu_Search
+from Iterated_Tabu import Iterated_Tabu
 from simulated_annealing import Simulated_Annealing
 from great_deluge import Great_deluge
 from State import State
-class Methods():
-    def __init__(self,solver):
-        self.tabu_search = Tabu_Search(solver)
-        self.simulated_annealing = Simulated_Annealing(solver.maxtime)
-        self.great_deluge = Great_deluge(solver)
+
 class Solver:
     def __init__(self,f,maxtime, random_seed = 10):
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
         State.cars, State.rlist,State.options = readCSV(Car,Reservation,self.f)
-
+        
+        self.tabu_search = Tabu_Search(self)
+        self.Iterated_Tabu = Iterated_Tabu(self)
+        self.simulated_annealing = Simulated_Annealing(self.maxtime)
+        self.great_deluge = Great_deluge(self)
         """
         self.sorted_rlist = []
         for e in self.rlist:
@@ -41,14 +42,14 @@ class Solver:
         self.bestrlist = None
         
         #base state of solution
-        Code.add(self)
+        Code.add()
         
     def freeData(self):
         for r in State.rlist:
             r.car = None
             r.notAssigned=True
             r.adjZone=False
-        for c in self.cars:
+        for c in State.cars:
             c.res=[]
             
     def setBest(self):
@@ -61,7 +62,7 @@ class Solver:
     def getBest(self):
         return self.bestCost
         
-    def initialSolution(self):
+    def initialSolution():
         for r in State.rlist:
             if(r.notAssigned):
                 for cid in State.options[r.id]:
@@ -95,27 +96,27 @@ class Solver:
 
 def main(argTime,argFile):
     solver = Solver(argFile,argTime)
-    methods = Methods(solver)
     #Printer.printDict(Car)
     
-    solver.initialSolution()
+    Solver.initialSolution()
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
-    Code.add(solver)
+    Code.add()
     print("----------------"*2)    
+    solver.simulated_annealing.simulatedAnnealing()
+    #solver.tabu_search.findSolution()
+    #solver.Iterated_Tabu.findSolution()
+    #solver.tabu_search.VariableNeighbourhoud()
     
-    #solver.bestrlist,solver.bestcars = methods.tabu_search.findSolution()
-    #solver.bestrlist,solver.bestcars = methods.tabu_search.VariableNeighbourhoud()
+    #solver.simulated_annealing.simulatedAnnealing()
     
-    solver.bestrlist , solver.bestcars = methods.simulated_annealing.simulatedAnnealing()
-    
-    #methods.great_deluge.staydry(Cost.getCost(solver.rlist)/20)
+    #solver.bestrlist , solver.bestcars = solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
     print("----------------"*2)
     
-    solver.bestCost = Cost.getCost(solver.bestrlist)
+    solver.bestCost = State.getBest()
     print(Cost.getCost(solver.bestrlist))
     # Printer.printResult(solver.bestrlist,solver.cars)
-    writeCSV(solver,Car)
+    writeCSV(solver.f)
     Printer.printFinal(solver,Code)
     
   

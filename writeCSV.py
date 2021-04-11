@@ -5,8 +5,9 @@ Created on Sat Mar 13 23:50:06 2021
 @author: dehan
 """
 import csv
-def writeCSV(solver,Car):
-    f = solver.f
+from State import State
+from Car import Car
+def writeCSV(f):
     print(f)
     f = f.split('/')[-1]
     #f = f.split('\\')[-1] #een van deze twee splits afh. van OS denk ik
@@ -14,10 +15,8 @@ def writeCSV(solver,Car):
     
     f = f.split('.')[0]
     print(f)
-    cars  = solver.bestcars
-    cost  = solver.bestCost
-    rlist = solver.bestrlist
-    
+
+    rlist,cars,cost = State.resultRlist,State.resultCars,State.result
     with open('./csv_solutions/'+f+'_solution.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=';',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
