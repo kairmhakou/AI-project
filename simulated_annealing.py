@@ -22,7 +22,17 @@ from State import State
 START_TEMPRATURE = 200 #100
 END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
 NUM_ITERATIONS= 25
-COOLING_RATE = 0.999 #Moet lichtelijk anders zijn voor elk probleem 
+COOLING_RATE = 0.99#Moet lichtelijk anders zijn voor elk probleem 
+"""
+@Karim
+Een van de paramters moet 'dynamish' zijn/ worden aangepast 
+bv 100_5_14_25.csv is vrij klein => localSearch is snel klaar => numIterations worden sneller uitgevoerd dan bij een groot probleem ie. 360_5_71_25.csv
+ als het x keer sneller is wordt de temperatuur x keer meer afgekoelt bij kleinere problemen
+Ik denk dat de COOLING_RATE afhankelijk moet zijn van hoe lang het duurt om 'numIteration' uit te voeren
+    tijd meten kan met startpunt =  time.perf_counter()
+
+"""
+
 
 class Simulated_Annealing:
     def __init__(self,maxtime):
@@ -43,7 +53,7 @@ class Simulated_Annealing:
                         #print(r.id,":",c.id)
                         return c,None,r
         return None,None,None
-    def hill_climbing(self, experimental = 1):
+    def hill_climbing(self, experimental = 0):
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in State.rlist:
@@ -146,8 +156,17 @@ class Simulated_Annealing:
                         State.backup(newCost)
 
                         if(newCost<State.result):
-                            # print("new best cost")
+                            print("New Best:",newCost,end = "->")
                             State.setBestResult(newCost)
+                            self.localSearch()
+                            newCost= Cost.getCost(State.rlist)
+                            if(newCost<State.result):
+                                State.backup(newCost)
+                                State.setBestResult(newCost)
+                                currCost = newCost
+                                print("EXPERIMENTAL:",newCost,end ='')
+                            print()
+                            
                     else:
                         
                         probability= math.exp(-((diff)/t))
@@ -167,7 +186,7 @@ class Simulated_Annealing:
 
                     i += 1
                 # Gometric
-                # t *= COOLING_RATE 
+                #t *= COOLING_RATE 
 
                 #de beste cooling mainer
                 # exponential cooling
@@ -182,9 +201,9 @@ class Simulated_Annealing:
                 # Quadratic multiplicative cooling
                 # t= START_TEMPRATURE / (1+COOLING_RATE*numOfIteration**2)
 
-                #deze manier 
+                #deze manier werkt ni denk ik; verschil in t is te klein om effect te hebben op numOfIteration => t verandert niet => numIt =>...
                 # numOfIteration = NUM_ITERATIONS *(1 - t/START_TEMPRATURE) +10
-                # numOfIteration= math.ceil(x)
+                # numOfIteration= math.ceil(numOfIteration)
                 
                 #of deze 
                 numOfIteration +=1.2
