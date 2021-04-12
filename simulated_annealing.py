@@ -21,8 +21,8 @@ from State import State
 #global variables
 START_TEMPRATURE = 200 #100
 END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
-NUM_ITERATIONS= 1000
-COOLING_RATE = 0.99 #Moet lichtelijk anders zijn voor elk probleem 
+NUM_ITERATIONS= 25
+COOLING_RATE = 0.999 #Moet lichtelijk anders zijn voor elk probleem 
 
 class Simulated_Annealing:
     def __init__(self,maxtime):
@@ -43,7 +43,7 @@ class Simulated_Annealing:
                         #print(r.id,":",c.id)
                         return c,None,r
         return None,None,None
-    def hill_climbing(self):
+    def hill_climbing(self, experimental = 1):
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in State.rlist:
@@ -53,7 +53,18 @@ class Simulated_Annealing:
                     cost = Cost.costToAddR(c,r)
                     if(cost>best):
                         return c,None,r
-            
+        #All possible 'assigned car' swaps assign to adj zone
+        if(experimental):
+            for r in State.rlist:
+                if(r.notAssigned):
+                    adjZones = Car.zoneIDtoADJ[r.zone]
+                    for cid in State.options[r.id]:
+                        c = State.cars[cid]
+                        for zid in adjZones:         
+                            cost = Cost.costAddRSetZ(c,r,zid)
+                            if(cost>best):
+                                return c,zid,r  
+                          
         #All sensible 'car zone' swaps
         for c in State.cars:          
             for rid in c.res:
@@ -69,7 +80,7 @@ class Simulated_Annealing:
             bestc,bestz,bestr = self.hill_climbing()
             if(bestz is not None):
                 bestc.setZone(bestz)
-            elif(bestr is not None):
+            if(bestr is not None):
                 if(bestr.getCar()):#if currently assigned to a car, remove from list
                     bestr.getCar().res.remove(bestr.id)
                 #assign to new car

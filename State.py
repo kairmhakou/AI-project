@@ -9,6 +9,8 @@ Created on Sun Mar 14 14:03:22 2021
 
 import copy
 class State:
+    RassignCount = [0]*1000
+    
     maxC = 9999999999999999999
     options = None
     cars,rlist,bestCost = None,None,maxC  
@@ -16,11 +18,9 @@ class State:
     backupCars,backupRlist,backupCost = None,None,maxC
     
     resultRlist,resultCars,result = None,None,maxC
+    
+    curCode = None
     def restore():
-        """print(State.cars)
-        print(State.rlist)
-        print("backupCars",State.backupCars)
-        print(State.backupRlist)"""
         State.cars = [x.clone() for x in State.backupCars]
         State.rlist = [x.clone() for x in State.backupRlist]
     def backup(cost):

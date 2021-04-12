@@ -16,13 +16,12 @@ class Reservation:
         
         self.notAssigned = True #1 -> not assigned
         self.adjZone = False #1 -> assigned to adjecent zone
-        
-        self.assignCount = 0
+
     def clone(self):
         cloneRes = Reservation(self.zone,-1,self.start,-1,self.P1,self.P2,inc = 0)
         cloneRes.notAssigned = self.notAssigned
         cloneRes.adjZone = self.adjZone
-        cloneRes.assignCount = self.assignCount
+
 
         cloneRes.start = self.start
         cloneRes.end = self.end

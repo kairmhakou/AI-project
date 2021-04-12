@@ -14,6 +14,7 @@ class Code:
     memCount = 0
     #passedCodes = [] #split single list of all passed codes into dictionary of lists divided based on len(code)
     passedCodesPerL = {}
+    passedCodes = set()
     def formCode():
         rcode,ccode = [],[]
         for r in State.rlist:
@@ -21,20 +22,21 @@ class Code:
         for c in State.cars:
             ccode.append(c.code())
         return [rcode,ccode]
-    def add(solver):
+    def add():
         ncode = Code.formCode() 
-        solver.curcode = ncode
+        State.curcode = ncode
         if(Code.inMemory(ncode)):
             return 0
-        #plaat op juiste plaats (gesorteerd)
-        #bisect.insort(Code.passedCodes, c) 
     
         #which-is-faster-hash-lookup-or-binary-search
         #https://stackoverflow.com/questions/360040/which-is-faster-hash-lookup-or-binary-search
         #test: set 173 sec, array + binary search : 141 sec
         #binary search without splitting codes in dictionary: 156 sec
-        
         c = Code.codeToStr(ncode)
+        
+        Code.passedCodes.add(c)
+        return 1
+        
         lenC = len(c)
         if(lenC in Code.passedCodesPerL):
             #Code.passedCodesPerL[lenC].append(c)
@@ -48,12 +50,13 @@ class Code:
         s = ''
         for r in code[0]:
             if(r == 'x'):
-                s+="10"
+                s+="x"
             else:
                 s+=str(r)
+ 
         for c in code[1]:
             s+=str(c)
-        #print(s)
+
         return s
     def find(L, target):
         #binary search trough list
@@ -77,7 +80,13 @@ class Code:
             => lage kans dat twee verschillende code dezelfde lengte hebben
         => moeten meestal niet zoeken door een lijst van duizende code
         """
+ 
         codeString = Code.codeToStr(code)
+        if(codeString in Code.passedCodes):
+            return True
+        else:
+            return False
+        
         lenCodeString = len(codeString)
         if(not(lenCodeString in Code.passedCodesPerL)):
             return False # No other codes of this length
