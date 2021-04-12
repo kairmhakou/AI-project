@@ -1,0 +1,12 @@
+
+Exponential cooling 
+solution is feasible!
+solution cost: 8975
+solution is feasible!
+solution cost: 6025
+solution is feasible!
+solution cost: 11400
+solution is feasible!
+solution cost: 5140
+solution is feasible!
+solution cost: 12285
