@@ -19,23 +19,22 @@ import math
 from Car import Car
 from State import State
 #global variables
-START_TEMPRATURE = 100
-END_TEMPRATURE= 10
-NUM_ITERATIONS= 25
-COOLING_RATE = 0.99
+START_TEMPRATURE = 200 #100
+END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
+NUM_ITERATIONS= 1000
+COOLING_RATE = 0.99 #Moet lichtelijk anders zijn voor elk probleem 
 
 class Simulated_Annealing:
-    def __init__(self,solver,Code, Car):
-        self.solver = solver
+    def __init__(self,maxtime):
+        self.maxtime = maxtime
         # self.sortedResPen = self.sort(State.rlist)
-        self.timeSpent = 0
-        self.deepCount = 0
     
     def hill_climbing_zonder_zones(self):
         #All possible 'assigned car' swaps
 
         for r in State.rlist:
-            for c in self.solver.options[r.id]:
+            for cid in State.options[r.id]:
+                c = State.cars[cid]
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
                     
                     cost =  Cost.costToAddR(c,r)
@@ -48,22 +47,11 @@ class Simulated_Annealing:
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in State.rlist:
-    
-            for cid in self.solver.options[r.id]:
+            for cid in State.options[r.id]:
                 c = State.cars[cid]
                 if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
                     cost = Cost.costToAddR(c,r)
                     if(cost>best):
-                        #nextcode = copy.deepcopy(self.solver.curcode)
-                        nextcode = Code.formCode(self.solver) 
-                        for temprid in c.res:
-                            tempr = State.rlist[temprid]
-                            if(r.overlap(tempr.start,tempr.end)):
-                                #overlap => r zou moeten worden verwijderd
-                                nextcode[0][tempr.id]='x'
-                        nextcode[0][r.id]=c.id
-                        if(Code.inMemory(nextcode)):
-                            continue
                         return c,None,r
             
         #All sensible 'car zone' swaps
@@ -71,38 +59,14 @@ class Simulated_Annealing:
             for rid in c.res:
                 r = State.rlist[rid]
                 cost =  Cost.costToSetZone(c,r.zone)
-                #print("zoneCost:",cost)
                 if(cost>best):
-                    
-                    #nextcode = copy.deepcopy(self.solver.curcode)
-                    nextcode = Code.formCode(self.solver) 
-                    nextcode[1][c.id] = r.zone 
-                    for temprid in c.res:
-                        tempr = State.rlist[temprid]
-                        if(tempr.zone == r.zone):
-                            pass
-                        elif(tempr.zone in Car.zoneIDtoADJ[r.zone]):
-                            pass
-                        else:
-                            nextcode[0][tempr.id]='x'
-                    if(Code.inMemory(nextcode)):
-                        continue
                     return c,r.zone,None
         
         return None,None,None
 
-    def localSearch(self,steepest_descent = 0):
-
-        count = 0
+    def localSearch(self):
         while(1):
-            count += 1
-            #pick one of the local search methods
-            if(steepest_descent):
-                pass#bestc,bestz,bestr,bestCost = self.steepest_descent()
-            else:
-                bestc,bestz,bestr = self.hill_climbing()
-
-
+            bestc,bestz,bestr = self.hill_climbing()
             if(bestz is not None):
                 bestc.setZone(bestz)
             elif(bestr is not None):
@@ -112,55 +76,44 @@ class Simulated_Annealing:
                 bestc.addR(bestr)
             else:
                 #reached peak
-                return count
-    
+                return
        
             
     def simulatedAnnealing(self):
-
-        
-        resultRlist,resultCars = copy.deepcopy(State.rlist), copy.deepcopy(State.cars)
-        result = 999999999999999
-        
-        currCost = Cost.getCost(State.rlist)
-        State.backup(Cost.getCost(State.rlist))
+        currCost = Cost.getCost(State.rlist)	
+        State.setBestResult(currCost)        
+        State.backup(currCost)
         
         start = time.perf_counter()
-
-        # sortedListP
-        # sortedResPen=self.sort(State.rlist)
-        # for r in self.sortedResPen:
-        #     print(r.P1)
-
         
         while(1):
-            if((time.perf_counter()-start) > self.solver.maxtime):
+            if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
             #select random  zone and assign it to random car 
             t = START_TEMPRATURE
-            
             #list for the plot
             tempratureList =[]
             probabilityList = []
-            diffTempList =[] #for diff/t values
+            iterations =[] #for diff/t values
             tempratureList.append(t)
             probabilityList.append(1)
+            iterations.append(0)
             minProbability =99999999
+            numOfIteration=1
             
-            coolCounter=0.50
+            
             while t > END_TEMPRATURE:
-                if((time.perf_counter()-start) > self.solver.maxtime):
+                if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
-                checkBest = self.solver.getBest()
                 i =0 
-                while(i < NUM_ITERATIONS):
-                    if((time.perf_counter()-start) > self.solver.maxtime):
+               
+                while(i < numOfIteration):
+                    if((time.perf_counter()-start) > self.maxtime):
                         print('~~timeisup~~')
                         break   #return because the time is up
                     
-                    # for j in range(random.randint(1, len(State.cars))):
                     for _ in range(1):
                         randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
                         randomCarIndex = random.randint(0, len(State.cars)-1)
@@ -168,47 +121,22 @@ class Simulated_Annealing:
                             continue
                         c1 = State.cars[randomCarIndex]
                         c1.setZone(randomZoneIndex)
- 
+
                     self.localSearch()
                     newCost= Cost.getCost(State.rlist)
-                    #print(newCost)
-                    #print(newCost, " ",currCost, randomZoneIndex, randomCarIndex)
                     diff = newCost - currCost                    
-                    #input(diff)
-                    
                     
                     if diff < 0:
                         
-                        #print("diff < 0" , newCost , diff, self.solver.getBest())
+                        #print("diff < 0" , newCost , diff, State.getBest())
                         # print("new peak")
                         
-                        tempstart = time.perf_counter()
-			
-                        #saveSolver = copy.deepcopy(self.solver)
-                        
-                        State.backup(Cost.getCost(State.rlist))
-                        
-                        self.timeSpent += time.perf_counter()- tempstart
-                        self.deepCount +=1
-                        currCost = Cost.getCost(State.rlist)
-                        
                         currCost = newCost
-                        if(newCost<self.solver.getBest()):
-                            # print("new best cost")
-                            
-                            tempstart = time.perf_counter()
-			
- 
-                            
+                        State.backup(newCost)
 
-                            self.timeSpent += time.perf_counter()- tempstart
-                            self.deepCount +=1
-                            bestCost = currCost
-                            self.solver.setBest() #print the setNewBest
-                            if(newCost<result):
-                                #bestSolver = copy.deepcopy(self.solver)
-                                resultRlist,resultCars = copy.deepcopy(State.rlist), copy.deepcopy(State.cars)
-                                result = newCost
+                        if(newCost<State.result):
+                            # print("new best cost")
+                            State.setBestResult(newCost)
                     else:
                         
                         probability= math.exp(-((diff)/t))
@@ -218,48 +146,61 @@ class Simulated_Annealing:
                             if(probability<minProbability):
                                 minProbability =probability
                             
-                            tempstart = time.perf_counter()
-                        
-                            #saveSolver = copy.deepcopy(self.solver)
-                            State.backup(Cost.getCost(State.rlist))
-                            self.timeSpent += time.perf_counter()- tempstart
-                            self.deepCount +=1
-                            
+                            State.backup(newCost)
                             currCost = newCost
                         else:
                             # coolCounter += 0.00001
-                            tempstart = time.perf_counter()
-                            #self.solver = copy.deepcopy(saveSolver)
                             State.restore()
                             currCost = Cost.getCost(State.rlist)
-                            self.timeSpent += time.perf_counter()- tempstart
-                            self.deepCount +=1
+
 
                     i += 1
-                    # checkBest = self.solver.getBest()
-                t *= COOLING_RATE
-                # t *= coolCounter
+                # Gometric
+                # t *= COOLING_RATE 
+
+                #de beste cooling mainer
+                # exponential cooling
+                t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
+                
+                # logarithmical cooling
+                # t= START_TEMPRATURE/(1 * math.log(numOfIteration+1)) 
+                
+                # #linear multiplicative  cooling
+                # t= START_TEMPRATURE / (1+COOLING_RATE*numOfIteration)
+
+                # Quadratic multiplicative cooling
+                # t= START_TEMPRATURE / (1+COOLING_RATE*numOfIteration**2)
+
+                #deze manier 
+                # numOfIteration = NUM_ITERATIONS *(1 - t/START_TEMPRATURE) +10
+                # numOfIteration= math.ceil(x)
+                
+                #of deze 
+                numOfIteration +=1.2
+
+                print(numOfIteration)
                 tempratureList.append(t)
                 probabilityList.append(minProbability)
+                iterations.append(numOfIteration)
+                print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
                 
-                print("t" , t ," cost " ,"best:",result,"current",newCost,"Backup",State.backupCost)
         
-        """ plt.figure(1)
-        plt.plot( probabilityList, tempratureList, 'bo')
-        plt.show()
+        # plt.figure(1)
+        # plt.plot( probabilityList, tempratureList, 'bo')
+        # plt.show()
+        # plt.figure(1)
+        # plt.plot(tempratureList, iterations)
+        # plt.show()
+        # plt.figure(2)
+        # plt.plot(probabilityList, iterations)
+        # plt.show()
         
-        plt.figure(2)
-        plt.plot(probabilityList)
-        plt.show() """
-        print("timeSpent:",self.timeSpent)
-        print("timeSpent:",self.timeSpent)
-        print("timeSpent:",self.deepCount)
-        return resultRlist , resultCars
+        return State.resultRlist , State.resultCars
     def sort(self,array):
         if len(array)<2:
             return array
         
-        middle= array[random.randint(0, len(array)-1)].P1
+        middle = array[random.randint(0, len(array)-1)].P1
         low , high , same =[], [] ,[]
 
         for r in array:
