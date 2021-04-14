@@ -9,6 +9,7 @@ Created on Sun Mar 14 14:03:22 2021
 
 import copy
 class State:
+    Zones = 0
     RassignCount = [0]*1000
     
     maxC = 9999999999999999999

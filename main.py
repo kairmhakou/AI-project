@@ -22,7 +22,7 @@ class Solver:
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
-        State.cars, State.rlist,State.options = readCSV(Car,Reservation,self.f)
+        State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,self.f)
         
         self.tabu_search = Tabu_Search(self)
         self.Iterated_Tabu = Iterated_Tabu(self)
@@ -103,12 +103,14 @@ def main(argTime,argFile):
     solver.setBest()
     Code.add()
     print("----------------"*2)    
-    solver.simulated_annealing.simulatedAnnealing()
-    #solver.tabu_search.findSolution()
-    #solver.Iterated_Tabu.findSolution()
-    #solver.tabu_search.VariableNeighbourhoud()
-    
     #solver.simulated_annealing.simulatedAnnealing()
+    
+    solver.Iterated_Tabu.Iterated_local_search()
+    #solver.Iterated_Tabu.Tabu_Search_base()
+    
+    #solver.tabu_search.findSolution()
+    #solver.tabu_search.VariableNeighbourhoud()
+
     
     #solver.bestrlist , solver.bestcars = solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
     print("----------------"*2)
