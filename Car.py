@@ -2,7 +2,7 @@
 """
 Created on Sun Mar 14 10:26:45 2021
 
-@author: dehan
+@author: Loic Dehan
 """
 from State import State
 class Car:
@@ -13,14 +13,13 @@ class Car:
     zoneStrtoID = {}
     zoneIDtoADJ = []
     
-    
     def __init__(self,inc = 1):
         self.id = Car.id
         self.res = [] #list of reservations assigned to this car
         self.zone = 0
         
         Car.id += inc
-    def code(self):
+    def _code(self):
         return self.zone
         
     def clone(self):
@@ -30,7 +29,7 @@ class Car:
         cloneCar.zone = self.zone
         return cloneCar
         
-    def inZone(self,r):
+    def _inZone(self,r):
         if(self.zone == r.zone):
             return 1 # car is in the ideal zone for r
         elif(self.zone in Car.zoneIDtoADJ[r.zone]):
@@ -40,7 +39,7 @@ class Car:
     def overlap(self,start,end):
         for rID in self.res:
             r = State.rlist[rID]
-            if(r.overlap(start,end)):
+            if(r.start < end and start < r.end):#(r.overlap(start,end)):
                 return True
         return False
 
@@ -53,15 +52,15 @@ class Car:
         while(i<len(self.res)):
             r = State.rlist[self.res[i]]
             #remove all res that overlap with nres
-            if(nres.overlap(r.start,r.end)):
+            if(nres.start < r.end and r.start < nres.end):#(nres.overlap(r.start,r.end)):
                 temprID = self.res.pop(i)
                 tempr = State.rlist[temprID]
-                tempr.setCar(-1)#None
+                tempr.carID = -1#None
                 tempr.notAssigned = True
                 tempr.adjZone =False
                 i-=1
             i+=1
-        nres.setCar(self.id)#self
+        nres.carID = self.id
         nres.notAssigned = False
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres.id)
@@ -82,7 +81,7 @@ class Car:
             else:
                 r.adjZone = False
                 r.notAssigned = True
-                r.setCar(-1)#None
+                r.carID = -1#None
                 self.res.pop(i)
                 i-=1
             i+=1        

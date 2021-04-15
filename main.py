@@ -42,7 +42,7 @@ class Solver:
         self.bestrlist = None
         
         #base state of solution
-        Code.add()
+        Code.add(Code.formCode() )
         
     def freeData(self):
         for r in State.rlist:
@@ -67,7 +67,9 @@ class Solver:
             if(r.notAssigned):
                 for cid in State.options[r.id]:
                         c = State.cars[cid]
-                        if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
+                        
+                        
+                        if(not(c.overlap(r.start,r.end)) and (c.zone == r.zone or c.zone in Car.zoneIDtoADJ[r.zone])):
                             c.addR(r)
                             break   
         for r in State.rlist:                
@@ -101,11 +103,12 @@ def main(argTime,argFile):
     Solver.initialSolution()
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
-    Code.add()
+    Code.add(Code.formCode() )
     print("----------------"*2)    
-    #solver.simulated_annealing.simulatedAnnealing()
     
-    solver.Iterated_Tabu.Iterated_local_search()
+    solver.simulated_annealing.simulatedAnnealing()
+    
+    #solver.Iterated_Tabu.Iterated_local_search()
     #solver.Iterated_Tabu.Tabu_Search_base()
     
     #solver.tabu_search.findSolution()
@@ -115,7 +118,7 @@ def main(argTime,argFile):
     #solver.bestrlist , solver.bestcars = solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
     print("----------------"*2)
     
-    solver.bestCost = State.getBest()
+    solver.bestCost = State.result
     print(Cost.getCost(solver.bestrlist))
     # Printer.printResult(solver.bestrlist,solver.cars)
     writeCSV(solver.f)

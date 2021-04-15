@@ -2,7 +2,7 @@
 """
 Created on Tue Mar 23 22:45:53 2021
 
-@author: dehan
+@author: Loic Dehan
 """
 import copy
 from Cost import Cost
@@ -80,19 +80,20 @@ class Iterated_Tabu:
                         cost = Cost.costToAddR(c,r)
                         if(cost>best):
                             if(currCost - cost<State.backupCost):
-                                return c,None,r,1
+                                return c,None,r,1,None
                             else:
                                 nextcode = Code.formCode() 
                                 for temprID in c.res:
                                     tempr = State.rlist[temprID]
-                                    if(r.overlap(tempr.start,tempr.end)):
+                                    if(r.start < tempr.end and tempr.start < r.end):#(r.overlap(tempr.start,tempr.end)):
                                         nextcode[0][tempr.id]='x'
                                 nextcode[0][r.id]=c.id
                                 if(Code.inMemory(nextcode)):
                                     continue
                             self.timeClimbing += (time.perf_counter()-tempStart)
                             self.countClimbing += 1 
-                            return c,None,r,0
+                            return c,None,r,0,nextcode
+        
         if(exp == 1):
             #All possible 'assigned car' swaps assign to adj zone
             for r in State.rlist:
@@ -104,7 +105,7 @@ class Iterated_Tabu:
                             cost = Cost.costAddRSetZ(c,r,zid)
                             if(cost>best):
                                 if(currCost - cost<State.backupCost):  
-                                    return c,zid,r,1
+                                    return c,zid,r,1,None
                                 else:
                                     nextcode = Code.formCode() 
                                     nextcode[1][c.id] = zid 
@@ -116,15 +117,15 @@ class Iterated_Tabu:
                                             pass
                                         else:
                                             nextcode[0][tempr.id]='x'
-                                        if(r.overlap(tempr.start,tempr.end)):
+                                        if(r.start < tempr.end and tempr.start < r.end):#(r.overlap(tempr.start,tempr.end)):
                                             nextcode[0][tempr.id]='x'
                                     nextcode[0][r.id]=c.id
                                     if(Code.inMemory(nextcode)):
                                         continue
                                 self.timeClimbing += (time.perf_counter()-tempStart)
                                 self.countClimbing += 1 
-                                return c,zid,r,0   
-        if(1):#else:
+                                return c,zid,r,0,nextcode   
+        if(1):
             #All sensible 'car zone' swaps #overbodig?
             for c in State.cars:
                 for rid in c.res:
@@ -146,43 +147,45 @@ class Iterated_Tabu:
                             continue
                         self.timeClimbing += (time.perf_counter()-tempStart)
                         self.countClimbing += 1                     
-                        return c,zid,None,0
+                        return c,zid,None,0,nextcode
             self.timeClimbing += (time.perf_counter()-tempStart)
             self.countClimbing += 1 
      
-        return None,None,None,0
+        return None,None,None,0,None
 
     def localSearch(self,method = 0,exp = 0):
         tempStart = time.perf_counter()
-        count = 0
-        newBackup = 0
-        finishBackup = 0
+        
+        count,newBackup,finishBackup = 0,0,0
+
         while(1):
             count += 1
             if(method == 0):#first improvement until local best
-                bestc,bestz,bestr,newBackup = self.hill_climbing(exp)
+                bestc,bestz,bestr,newBackup,nextcode = self.hill_climbing(exp)
                 if(bestz is not None):
                     bestc.setZone(bestz)
+                  
                 if(bestr is not None):
+
                     if(bestr.getCar()):#if currently assigned to a car, remove from rlist
                         bestr.getCar().res.remove(bestr.id)
                     #assign to new car
                     bestc.addR(bestr)
-                    
                     
                 else:#reached peak
                     break
                 if(newBackup):
                     finishBackup = 1
                     backupCost = Cost.getCost(State.rlist)
-                    Code.add()
-                elif(not(Code.add())):
+                    Code.add(Code.formCode() )
+                elif(not(Code.add(Code.formCode()))):
                     print("iets fout met nextcode in localSearch")
+                
             else: #least bad step away from local best
                 bestc,bestz = self.steepest_descent()
                 if(bestz is not None):
                     bestc.setZone(bestz)
-                    if(not(Code.add())):
+                    if(not(Code.add(Code.formCode() ))):
                         print("iets fout met nextcode in localSearch")
                 break
             
@@ -219,8 +222,8 @@ class Iterated_Tabu:
             bestc.setZone(bestr.zone)
             bestc.addR(bestr) 
             used.append(bestr.id)
-
-            Code.add()
+            
+            Code.add(Code.formCode())
 
         self.timeSpentLA += time.perf_counter()-tempStart        
    
@@ -236,13 +239,13 @@ class Iterated_Tabu:
                  
             self.localSearch(exp = 1) #find local minimum of cost 
             cost = Cost.getCost(State.rlist)
-            if(cost<State.getBest()):
+            if(cost<State.result):
                 State.setBestResult(cost)
             self.localSearch(method = 1) # take 1 step that increases the cost the least
             
                 
             if(i%100==0):
-                print(time.perf_counter()-start,i,':',cost,State.getBest(),State.backupCost)
+                print(time.perf_counter()-start,i,':',cost,State.result,State.backupCost)
     def Iterated_local_search(self):
         sinceLast = time.perf_counter()
         prevBest = 999999999999999
@@ -261,7 +264,7 @@ class Iterated_Tabu:
             
             if((time.perf_counter()-sinceLast) > 5):#check atleast x% better every y seconds
                 sinceLast = time.perf_counter()
-                print("checkTime",sinceLast-start,prevBest)#State.backupCost,"cur:",Cost.getCost(State.rlist), "best:",State.getBest())
+                print("checkTime",sinceLast-start,prevBest)#State.backupCost,"cur:",Cost.getCost(State.rlist), "best:",State.result)
                 if(not((prevBest-State.backupCost)/prevBest)>0):#No improvement since last check
                     print("too slow")
                     self.leastAssigned(amount)
@@ -273,7 +276,7 @@ class Iterated_Tabu:
             
             #slaag beste resultaat op voor eindresultaat
             cost = Cost.getCost(State.rlist)
-            if(cost<State.getBest()):
+            if(cost<State.result):
                 State.setBestResult(cost)
                 sinceLast = time.perf_counter()
                 
@@ -287,12 +290,14 @@ class Iterated_Tabu:
   
             changed = self.perturbeer()
             if(not(changed)):#All options for perturbeer are tabu
-                self.leastAssigned(1)
-                
+                print("=> leastAssigned")
+                self.leastAssigned(amount)
+                State.backup(Cost.getCost(State.rlist))    
+                prevBest = State.backupCost
             
             ############
             if(i%100==0):
-                print(time.perf_counter()-start,i,':',"cur:",Cost.getCost(State.rlist), "best:",State.getBest(),"backup:",State.backupCost)
+                print(time.perf_counter()-start,i,':',"cur:",Cost.getCost(State.rlist), "best:",State.result,"backup:",State.backupCost)
                 
  
         print("time spent in localSearch:",self.timeSpentLS,self.countLS,self.timeSpentLS/self.countLS) #11.36  /  99.62
@@ -305,7 +310,8 @@ class Iterated_Tabu:
         
         print("time spent in 1:",self.timeSpent1) 
         print("time spent in 2:",self.timeSpent2) 
-        Code.printTimes()   
+        
+        print("time spent in getCost:",Cost.timeSpentGet,Cost.timeSpentGet/Cost.countGet) 
     
     def choose(self,r,minL,bestc,bestr):
         for cid in State.options[r.id]:
@@ -319,7 +325,7 @@ class Iterated_Tabu:
                     if(not(tempr.zone == r.zone or tempr.zone in Car.zoneIDtoADJ[r.zone])):
                         nextcode[0][tempr.id] = 'x' #r can no longer assigned
                     #overlap
-                    elif(r.overlap(tempr.start,tempr.end)):
+                    elif(r.start < tempr.end and tempr.start < r.end):#(r.overlap(tempr.start,tempr.end)):
                         nextcode[0][tempr.id] = 'x'
                 nextcode[0][r.id] = c.id #r would be assign to c (addR)
                 nextcode[1][c.id] = r.zone #c would be placed in r's zone (setZone)
@@ -337,33 +343,34 @@ class Iterated_Tabu:
         minL = 99999999999
         bestc = None
         bestr = None
+        #Look through not assigned reservations
         for r in State.rlist:
             if(r.notAssigned):
                 bestc,bestr,minL = self.choose(r,minL,bestc,bestr)
-                if(bestr):
-                    pass
+        
+        #Look through not assigned reservations
         if(bestr is None):
-            #print("try adjecent")
             for r in State.rlist:
                 if(r.adjZone):
                     bestc,bestr,minL = self.choose(r,minL,bestc,bestr)
-        
-        if(bestr is None):#in commentaar
-            #print("try all others")
+        """
+        #Look through all others
+        if(bestr is None):
             for r in State.rlist:
                 if(not(r.adjZone or r.notAssigned)):
                     bestc,bestr,minL = self.choose(r,minL,bestc,bestr)
-          
+        """  
+        
+        #Assign bestr to bestc and add to tabu list
         if(bestr):                
             bestc.setZone(bestr.zone)
             bestc.addR(bestr)
-           
-            if(not(Code.add())):
-                print("iets fout met nextcode in forceAssign")
-            #print(" Forced assign")    
+            Code.add(Code.formCode())
+   
             self.timeSpentPert += time.perf_counter()-tempStart       
             return 1
         else:    
+            #All assignments are tabu
             print("No Forced assign")
             self.timeSpentPert += time.perf_counter()-tempStart                   
             return 0

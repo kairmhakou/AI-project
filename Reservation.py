@@ -22,7 +22,6 @@ class Reservation:
         cloneRes.notAssigned = self.notAssigned
         cloneRes.adjZone = self.adjZone
 
-
         cloneRes.start = self.start
         cloneRes.end = self.end
         
@@ -33,45 +32,38 @@ class Reservation:
         if(self.carID == -1):
             return None
         return State.cars[self.carID]
-        #return self.car
     
-    def setCar(self,car):
+    def _setCar(self,car):
         self.carID = car
 
-    def cost(self):
+    def _cost(self):
         return self.notAssigned*self.P1 + self.adjZone*self.P2
 
     def costNewZone(self,zone):
         #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):
-            return self.cost()-0
+            return self.notAssigned*self.P1 + self.adjZone*self.P2  -   0
         elif(self.zone in Reservation.zoneIDtoADJ[zone]):
-            return self.cost()-self.P2
+            return self.notAssigned*self.P1 + self.adjZone*self.P2  -   self.P2
         else:
-            return self.cost()-self.P1
+            return self.notAssigned*self.P1 + self.adjZone*self.P2  -   self.P1
     
-    def overlap(self,start,end):
-        #https://stackoverflow.com/questions/13513932/algorithm-to-detect-overlapping-periods
+    def _overlap(self,start,end):
         return (self.start < end and start < self.end)
 
-    
-    def code(self):
-        
+    def _code(self):
         if(self.carID == -1):#None
             return 'x'
         return self.carID
-        #return self.car
-    """
+    
     def __str__(self):
         s = str(self.id)+ " "
         s += Reservation.resIDtoStr[self.id]
         s+=", zone: "+str(self.zone)
         s+= ", P1/P2: "+str(self.P1)+'/'+str(self.P2)
         s+= ", s/e: "+str(self.start)+'/'+str(self.end)
-        s += " / len(CarOptions):"+ str(len(self.options))+" assign to: "
-        if(self.car):
-            s+=str(self.car)#.id)
+        s+=str(self.carID)
         return s
-    """
+  
 if __name__ == "__main__":
     pass

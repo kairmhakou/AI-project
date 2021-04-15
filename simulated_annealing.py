@@ -19,10 +19,10 @@ import math
 from Car import Car
 from State import State
 #global variables
-START_TEMPRATURE = 200 #100
-END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
+START_TEMPRATURE = 100 #100
+END_TEMPRATURE= 0
 NUM_ITERATIONS= 25
-COOLING_RATE = 0.99#Moet lichtelijk anders zijn voor elk probleem 
+COOLING_RATE = 0.995#Moet lichtelijk anders zijn voor elk probleem 
 """
 @Karim
 Een van de paramters moet 'dynamish' zijn/ worden aangepast 
@@ -53,7 +53,7 @@ class Simulated_Annealing:
                         #print(r.id,":",c.id)
                         return c,None,r
         return None,None,None
-    def hill_climbing(self, experimental = 0):
+    def hill_climbing(self, experimental = 1):
         best = 0 #verbetering >0
         #All possible 'assigned car' swaps
         for r in State.rlist:
@@ -117,10 +117,11 @@ class Simulated_Annealing:
             tempratureList =[]
             probabilityList = []
             iterations =[] #for diff/t values
+            times = [0]
             tempratureList.append(t)
             probabilityList.append(1)
             iterations.append(0)
-            minProbability =99999999
+            minProbability = 99999999
             numOfIteration=1
             
             
@@ -158,15 +159,6 @@ class Simulated_Annealing:
                         if(newCost<State.result):
                             print("New Best:",newCost,end = "->")
                             State.setBestResult(newCost)
-                            self.localSearch()
-                            newCost= Cost.getCost(State.rlist)
-                            if(newCost<State.result):
-                                State.backup(newCost)
-                                State.setBestResult(newCost)
-                                currCost = newCost
-                                print("EXPERIMENTAL:",newCost,end ='')
-                            print()
-                            
                     else:
                         
                         probability= math.exp(-((diff)/t))
@@ -185,12 +177,17 @@ class Simulated_Annealing:
 
 
                     i += 1
+                #Independant of problem size
+                secondsPassed = int((time.perf_counter()-start)/(self.maxtime/150))
+                t = 100*(1.03**(-secondsPassed))    #https://www.desmos.com/calculator/3fisjexbvp
+                
+                    
                 # Gometric
                 #t *= COOLING_RATE 
 
                 #de beste cooling mainer
                 # exponential cooling
-                t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
+                #t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
                 
                 # logarithmical cooling
                 # t= START_TEMPRATURE/(1 * math.log(numOfIteration+1)) 
@@ -212,19 +209,29 @@ class Simulated_Annealing:
                 tempratureList.append(t)
                 probabilityList.append(minProbability)
                 iterations.append(numOfIteration)
+                
+                times.append(time.perf_counter()-start)
                 print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
                 
-        
-        # plt.figure(1)
-        # plt.plot( probabilityList, tempratureList, 'bo')
-        # plt.show()
-        # plt.figure(1)
-        # plt.plot(tempratureList, iterations)
-        # plt.show()
-        # plt.figure(2)
-        # plt.plot(probabilityList, iterations)
-        # plt.show()
-        
+        """
+        plt.figure(1)
+        plt.plot( probabilityList, tempratureList, 'bo')
+        plt.show()
+        plt.figure(2)
+        plt.plot(tempratureList, iterations)
+        plt.show()
+        plt.figure(3)
+        plt.plot(probabilityList, iterations)
+        plt.show()
+        """
+        """
+        #Moet in de tijd lijken op de exponentiele daling niet ten opzichte van het aantal iteraties
+        plt.figure(4)
+        print(tempratureList)
+        print(times)
+        plt.plot(tempratureList, times)
+        plt.show()
+        """
         return State.resultRlist , State.resultCars
     def sort(self,array):
         if len(array)<2:
