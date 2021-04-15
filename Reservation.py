@@ -41,6 +41,8 @@ class Reservation:
     def cost(self):
         return self.notAssigned*self.P1 + self.adjZone*self.P2
 
+
+    
     def costNewZone(self,zone):
         #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):

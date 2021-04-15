@@ -19,14 +19,15 @@ import math
 from Car import Car
 from State import State
 #global variables
-START_TEMPRATURE = 200 #100
+START_TEMPRATURE = 180000 #100
 END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
-NUM_ITERATIONS= 25
-COOLING_RATE = 0.999 #Moet lichtelijk anders zijn voor elk probleem 
+NUM_ITERATIONS= 100
+COOLING_RATE = 0.99#Moet lichtelijk anders zijn voor elk probleem 
 
 class Simulated_Annealing:
-    def __init__(self,maxtime):
+    def __init__(self,maxtime ):
         self.maxtime = maxtime
+        
         # self.sortedResPen = self.sort(State.rlist)
     
     def hill_climbing_zonder_zones(self):
@@ -90,19 +91,22 @@ class Simulated_Annealing:
                 return
        
             
-    def simulatedAnnealing(self):
+    def simulatedAnnealing(self, startTemperature, endTemperature ,beginNumItr, itrIncrease ,coolingRate):
         currCost = Cost.getCost(State.rlist)	
         State.setBestResult(currCost)        
         State.backup(currCost)
-        
+        print(len(State.rlist))
         start = time.perf_counter()
         
+        cooling=coolingRate
         while(1):
             if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
             #select random  zone and assign it to random car 
-            t = START_TEMPRATURE
+            # t = START_TEMPRATURE
+            t=startTemperature
+            
             #list for the plot
             tempratureList =[]
             probabilityList = []
@@ -111,15 +115,16 @@ class Simulated_Annealing:
             probabilityList.append(1)
             iterations.append(0)
             minProbability =99999999
-            numOfIteration=1
+            numOfIteration=beginNumItr
             
             
-            while t > END_TEMPRATURE:
+            
+            while t > endTemperature:
                 if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
                 i =0 
-               
+                
                 while(i < numOfIteration):
                     if((time.perf_counter()-start) > self.maxtime):
                         print('~~timeisup~~')
@@ -144,14 +149,15 @@ class Simulated_Annealing:
                         
                         currCost = newCost
                         State.backup(newCost)
-
+                        
                         if(newCost<State.result):
                             # print("new best cost")
+                            print("BEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSTTTTTTT")
                             State.setBestResult(newCost)
                     else:
                         
                         probability= math.exp(-((diff)/t))
-                        #print(probability)
+                        print(probability)
                         if(random.uniform(0,1) < probability):
                             # print("probability" , probability)
                             if(probability<minProbability):
@@ -160,7 +166,7 @@ class Simulated_Annealing:
                             State.backup(newCost)
                             currCost = newCost
                         else:
-                            # coolCounter += 0.00001
+                            
                             State.restore()
                             currCost = Cost.getCost(State.rlist)
 
@@ -171,25 +177,26 @@ class Simulated_Annealing:
 
                 #de beste cooling mainer
                 # exponential cooling
-                t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
+                # t= startTemperature * coolingRate**(numOfIteration)
+                # t= START_TEMPRATURE * COOLING_RATE**(NUM_ITERATIONS+numOfIteration)
                 
                 # logarithmical cooling
-                # t= START_TEMPRATURE/(1 * math.log(numOfIteration+1)) 
+                # t= startTemperature/(1 * math.log( numOfIteration+1))
                 
                 # #linear multiplicative  cooling
-                # t= START_TEMPRATURE / (1+COOLING_RATE*numOfIteration)
+                # t= startTemperature / (1+coolingRate*numOfIteration)
 
                 # Quadratic multiplicative cooling
-                # t= START_TEMPRATURE / (1+COOLING_RATE*numOfIteration**2)
+                t= startTemperature / (1+coolingRate*(numOfIteration)**2)
 
                 #deze manier 
                 # numOfIteration = NUM_ITERATIONS *(1 - t/START_TEMPRATURE) +10
                 # numOfIteration= math.ceil(x)
                 
                 #of deze 
-                numOfIteration +=1.2
+                numOfIteration +=itrIncrease
 
-                print(numOfIteration)
+                # print(numOfIteration)
                 tempratureList.append(t)
                 probabilityList.append(minProbability)
                 iterations.append(numOfIteration)
@@ -223,3 +230,4 @@ class Simulated_Annealing:
                 same.append(r)
 
         return self.sort(high) + same + self.sort(low)
+

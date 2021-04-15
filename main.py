@@ -103,7 +103,8 @@ def main(argTime,argFile):
     solver.setBest()
     Code.add()
     print("----------------"*2)    
-    solver.simulated_annealing.simulatedAnnealing()
+    #startTemperature, endTemperature, first num of iterations, increase factor, coolingrate
+    solver.simulated_annealing.simulatedAnnealing(10000, 0, 2, 1, 0.99)
     #solver.tabu_search.findSolution()
     #solver.Iterated_Tabu.findSolution()
     #solver.tabu_search.VariableNeighbourhoud()
@@ -124,6 +125,6 @@ if __name__ == "__main__":
     argTime=int(sys.argv[1])
     argFile=sys.argv[2]
     #argTime=300
-    #argFile='./csv/210_5_33_25.csv'
+    #argFile='./csv/100_5_14_25.csv'
     main(argTime,argFile)
     

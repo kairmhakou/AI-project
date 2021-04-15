@@ -10,3 +10,15 @@ solution is feasible!
 solution cost: 5140
 solution is feasible!
 solution cost: 12285
+
+best record
+./csv/100_5_14_25.csv
+100_5_14_25
+bestc: 8785
+
+25425
+./csv/100_5_14_25.csv
+100_5_14_25
+bestc: 8770
+solution is feasible!
+solution cost: 8770 -> i+0.5 , n+=1 , ST= 180000 , CR=0.99, Quadratic multiplicative cooling
