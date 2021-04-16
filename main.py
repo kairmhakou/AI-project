@@ -4,7 +4,7 @@ import time
 
 import sys
 #
-from readCSV import readCSV
+from readCSV import average, readCSV
 from writeCSV import writeCSV
 from Car import Car
 from Reservation import Reservation
@@ -129,6 +129,7 @@ def main(argTime,argFile,fileNum):
 if __name__ == "__main__":
     rond =0
     fileNum= 0
+    
     while(rond <2):
         Reservation.id =0
         Car.id =0
@@ -140,6 +141,6 @@ if __name__ == "__main__":
         Car.zoneIDtoADJ=[]
         fileNum+=1
         main(argTime,argFile , fileNum)
-        
         rond+=1
-        
+    averageCost = average(argFile) 
+    print('average cost ',averageCost) 
