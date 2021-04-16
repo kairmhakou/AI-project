@@ -22,7 +22,7 @@ class Solver:
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
-        State.cars, State.rlist,State.options = readCSV(Car,Reservation,self.f)
+        State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,self.f)
         
         self.tabu_search = Tabu_Search(self)
         self.Iterated_Tabu = Iterated_Tabu(self)
@@ -42,7 +42,7 @@ class Solver:
         self.bestrlist = None
         
         #base state of solution
-        Code.add()
+        Code.add(Code.formCode() )
         
     def freeData(self):
         for r in State.rlist:
@@ -67,7 +67,9 @@ class Solver:
             if(r.notAssigned):
                 for cid in State.options[r.id]:
                         c = State.cars[cid]
-                        if(not(c.overlap(r.start,r.end)) and (c.inZone(r))):
+                        
+                        
+                        if(not(c.overlap(r.start,r.end)) and (c.zone == r.zone or c.zone in Car.zoneIDtoADJ[r.zone])):
                             c.addR(r)
                             break   
         for r in State.rlist:                
@@ -92,7 +94,7 @@ class Solver:
                             c.setZone(r.zone)
                             c.addR(r)
                             break
-
+        
 
 def main(argTime,argFile):
     solver = Solver(argFile,argTime)
@@ -101,20 +103,22 @@ def main(argTime,argFile):
     Solver.initialSolution()
     #Printer.printResult(solver.rlist,solver.cars)
     solver.setBest()
-    Code.add()
+    Code.add(Code.formCode() )
     print("----------------"*2)    
-    #startTemperature, endTemperature, first num of iterations, increase factor, coolingrate
-    solver.simulated_annealing.simulatedAnnealing(10000, 0, 2, 1, 0.99)
-    #solver.tabu_search.findSolution()
-    #solver.Iterated_Tabu.findSolution()
-    #solver.tabu_search.VariableNeighbourhoud()
     
-    #solver.simulated_annealing.simulatedAnnealing()
+    solver.simulated_annealing.simulatedAnnealing()
+    
+    #solver.Iterated_Tabu.Iterated_local_search()
+    #solver.Iterated_Tabu.Tabu_Search_base()
+    
+    #solver.tabu_search.findSolution()
+    #solver.tabu_search.VariableNeighbourhoud()
+
     
     #solver.bestrlist , solver.bestcars = solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
     print("----------------"*2)
     
-    solver.bestCost = State.getBest()
+    solver.bestCost = State.result
     print(Cost.getCost(solver.bestrlist))
     # Printer.printResult(solver.bestrlist,solver.cars)
     writeCSV(solver.f)
@@ -122,9 +126,15 @@ def main(argTime,argFile):
     
   
 if __name__ == "__main__":
-    argTime=int(sys.argv[1])
-    argFile=sys.argv[2]
-    #argTime=300
-    #argFile='./csv/100_5_14_25.csv'
-    main(argTime,argFile)
+    rond =0
     
+    while(rond <2):
+        Reservation.id =0
+        Car.id =0
+        argTime=int(sys.argv[1])
+        argFile=sys.argv[2]
+        #argTime=300
+        #argFile='./csv/100_5_14_25.csv'
+        main(argTime,argFile)
+        rond+=1
+        

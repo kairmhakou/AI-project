@@ -19,10 +19,20 @@ import math
 from Car import Car
 from State import State
 #global variables
-START_TEMPRATURE = 180000 #100
-END_TEMPRATURE= 0#10 #waarom 10 ipv 0? 
-NUM_ITERATIONS= 100
-COOLING_RATE = 0.99#Moet lichtelijk anders zijn voor elk probleem 
+START_TEMPERATURE = 100 #100
+END_TEMPERATURE= 0
+NUM_ITERATIONS= 25
+COOLING_RATE = 0.995#Moet lichtelijk anders zijn voor elk probleem 
+"""
+@Karim
+Een van de paramters moet 'dynamish' zijn/ worden aangepast 
+bv 100_5_14_25.csv is vrij klein => localSearch is snel klaar => numIterations worden sneller uitgevoerd dan bij een groot probleem ie. 360_5_71_25.csv
+ als het x keer sneller is wordt de temperatuur x keer meer afgekoelt bij kleinere problemen
+Ik denk dat de COOLING_RATE afhankelijk moet zijn van hoe lang het duurt om 'numIteration' uit te voeren
+    tijd meten kan met startpunt =  time.perf_counter()
+
+"""
+
 
 class Simulated_Annealing:
     def __init__(self,maxtime ):
@@ -91,35 +101,35 @@ class Simulated_Annealing:
                 return
        
             
-    def simulatedAnnealing(self, startTemperature, endTemperature ,beginNumItr, itrIncrease ,coolingRate):
+    def simulatedAnnealing(self):
         currCost = Cost.getCost(State.rlist)	
         State.setBestResult(currCost)        
         State.backup(currCost)
         print(len(State.rlist))
         start = time.perf_counter()
         
-        cooling=coolingRate
         while(1):
             if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
             #select random  zone and assign it to random car 
-            # t = START_TEMPRATURE
-            t=startTemperature
+            t = START_TEMPERATURE
+            
             
             #list for the plot
-            tempratureList =[]
+            temperatureList =[]
             probabilityList = []
             iterations =[] #for diff/t values
-            tempratureList.append(t)
+            times = [0]
+            temperatureList.append(t)
             probabilityList.append(1)
             iterations.append(0)
-            minProbability =99999999
-            numOfIteration=beginNumItr
+            minProbability = 99999999
+            numOfIteration=1
             
             
             
-            while t > endTemperature:
+            while t > END_TEMPERATURE:
                 if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
@@ -151,13 +161,12 @@ class Simulated_Annealing:
                         State.backup(newCost)
                         
                         if(newCost<State.result):
-                            # print("new best cost")
-                            print("BEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSSSSTTTTTTT")
+                            print("New Best:",newCost,end = "->")
                             State.setBestResult(newCost)
                     else:
                         
                         probability= math.exp(-((diff)/t))
-                        print(probability)
+                        # print(probability)
                         if(random.uniform(0,1) < probability):
                             # print("probability" , probability)
                             if(probability<minProbability):
@@ -172,13 +181,17 @@ class Simulated_Annealing:
 
 
                     i += 1
+                #Independant of problem size
+                secondsPassed = int((time.perf_counter()-start)/(self.maxtime/150))
+                t = 100*(1.03**(-secondsPassed))    #https://www.desmos.com/calculator/3fisjexbvp
+                
+                    
                 # Gometric
-                # t *= COOLING_RATE 
+                #t *= COOLING_RATE 
 
                 #de beste cooling mainer
                 # exponential cooling
-                # t= startTemperature * coolingRate**(numOfIteration)
-                # t= START_TEMPRATURE * COOLING_RATE**(NUM_ITERATIONS+numOfIteration)
+                #t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
                 
                 # logarithmical cooling
                 # t= startTemperature/(1 * math.log( numOfIteration+1))
@@ -187,32 +200,42 @@ class Simulated_Annealing:
                 # t= startTemperature / (1+coolingRate*numOfIteration)
 
                 # Quadratic multiplicative cooling
-                t= startTemperature / (1+coolingRate*(numOfIteration)**2)
+                # t= startTemperature / (1+coolingRate*(numOfIteration)**2)
 
-                #deze manier 
+                #deze manier werkt ni denk ik; verschil in t is te klein om effect te hebben op numOfIteration => t verandert niet => numIt =>...
                 # numOfIteration = NUM_ITERATIONS *(1 - t/START_TEMPRATURE) +10
-                # numOfIteration= math.ceil(x)
+                # numOfIteration= math.ceil(numOfIteration)
                 
                 #of deze 
-                numOfIteration +=itrIncrease
+                numOfIteration +=1.2
 
-                # print(numOfIteration)
-                tempratureList.append(t)
+                print(numOfIteration)
+                temperatureList.append(t)
                 probabilityList.append(minProbability)
                 iterations.append(numOfIteration)
+                
+                times.append(time.perf_counter()-start)
                 print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
                 
-        
-        # plt.figure(1)
-        # plt.plot( probabilityList, tempratureList, 'bo')
-        # plt.show()
-        # plt.figure(1)
-        # plt.plot(tempratureList, iterations)
-        # plt.show()
-        # plt.figure(2)
-        # plt.plot(probabilityList, iterations)
-        # plt.show()
-        
+        """
+        plt.figure(1)
+        plt.plot( probabilityList, tempratureList, 'bo')
+        plt.show()
+        plt.figure(2)
+        plt.plot(tempratureList, iterations)
+        plt.show()
+        plt.figure(3)
+        plt.plot(probabilityList, iterations)
+        plt.show()
+        """
+        """
+        #Moet in de tijd lijken op de exponentiele daling niet ten opzichte van het aantal iteraties
+        plt.figure(4)
+        print(tempratureList)
+        print(times)
+        plt.plot(tempratureList, times)
+        plt.show()
+        """
         return State.resultRlist , State.resultCars
     def sort(self,array):
         if len(array)<2:

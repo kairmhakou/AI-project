@@ -7,6 +7,9 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     with open(f, mode='r') as csv_file:
         csv_reader = csv.reader(csv_file , delimiter=";")
         for row in csv_reader:
+
+            if(row[0][:2]=="+Z"):
+                Zones = int(row[0].split(' ')[1])
             if row[0][0]=="r": #reservation
                 tempReservation=[]
                 for i in range(len(row)):
@@ -86,4 +89,4 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         Reservation.resIDtoStr[k] = ID
            
         k+=1
-    return cars, reservatieLijst,options
+    return cars, reservatieLijst,options,Zones

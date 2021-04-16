@@ -367,6 +367,17 @@ class Tabu_Search:
             print("margin")
         return newBest
 
+    def move(self,start):
+        foundNewBest = 0
+        margin = 0.2
+        while(1):
+            if(self.findPeak(start,margin)): # via local search
+                print("go deeper")
+                foundNewBest = 1
+                margin = 0
+            else:
+                return foundNewBest
+
     def shake(self,amount):
         tries = 0
         while(1):
@@ -386,17 +397,7 @@ class Tabu_Search:
                     print("violant shaking")
                     tries = 0
         
-    def move(self,start):
-        foundNewBest = 0
-        margin = 0.2
-        while(1):
-            if(self.findPeak(start,margin)): # via local search
-                print("go deeper")
-                foundNewBest = 1
-                margin = 0
-            else:
-                return foundNewBest
-
+    
             
     def VariableNeighbourhoud(self):
         start = time.perf_counter()        

@@ -28,6 +28,20 @@ Simulated Annealing(30sec, 1 random geen average):
 6520
 12835
 
+Simulated Annealing(300sec, 1 random geen average):#exponential cooling
+9020,9070,9130
+6210,6170,6230
+12035,12040,12670
+6080,5615,6040,
+10480,10555,10640
+
+Simulated Annealing(300sec, 1 random geen average):#math exponent
+8915
+6020
+9860
+4325
+7430
+
 
 Tabu(30sec):
 9365
@@ -44,8 +58,8 @@ Tabu(300sec):
 9040
 
 Iterated_Tabu(300sec):
-8905
-6130
-11235
-4925
-9360
+9025
+5625
+11145
+4975
+8960
