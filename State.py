@@ -34,5 +34,18 @@ class State:
         State.resultCars = [x.clone() for x in State.cars]
         State.result = cost
 
+    def reset():
+        State.Zones = 0
+        State.RassignCount = [0]*1000
+    
+        State.maxC = 9999999999999999999
+        State.options = None
+        State.cars,State.rlist,State.bestCost = None,None,State.maxC  
+    
+        State.backupCars,State.backupRlist,State.backupCost = None,None,State.maxC
+    
+        State.resultRlist,State.resultCars,State.result = None,None,State.maxC
+
+
 if __name__ == "__main__":
     pass

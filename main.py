@@ -96,7 +96,7 @@ class Solver:
                             break
         
 
-def main(argTime,argFile):
+def main(argTime,argFile,fileNum):
     solver = Solver(argFile,argTime)
     #Printer.printDict(Car)
     
@@ -121,13 +121,14 @@ def main(argTime,argFile):
     solver.bestCost = State.result
     print(Cost.getCost(solver.bestrlist))
     # Printer.printResult(solver.bestrlist,solver.cars)
-    writeCSV(solver.f)
+    
+    writeCSV(solver.f,fileNum)
     Printer.printFinal(solver,Code)
     
   
 if __name__ == "__main__":
     rond =0
-    
+    fileNum= 0
     while(rond <2):
         Reservation.id =0
         Car.id =0
@@ -135,6 +136,10 @@ if __name__ == "__main__":
         argFile=sys.argv[2]
         #argTime=300
         #argFile='./csv/100_5_14_25.csv'
-        main(argTime,argFile)
+        State.reset()
+        Car.zoneIDtoADJ=[]
+        fileNum+=1
+        main(argTime,argFile , fileNum)
+        
         rond+=1
         

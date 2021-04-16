@@ -7,9 +7,10 @@ Created on Sat Mar 13 23:50:06 2021
 import csv
 from State import State
 from Car import Car
-def writeCSV(f):
+
+def writeCSV(f, fileNum):
     
-    num = 0
+    
     print(f)
     f = f.split('/')[-1]
     #f = f.split('\\')[-1] #een van deze twee splits afh. van OS denk ik
@@ -17,10 +18,10 @@ def writeCSV(f):
     
     f = f.split('.')[0]
     print(f)
-    num +=1
+    
 
     rlist,cars,cost = State.resultRlist,State.resultCars,State.result
-    with open('./csv_solutions/'+f+'_solution_'+str(num)+'.csv', 'w', newline='') as csvfile:
+    with open('./csv_solutions/'+f+'_solution_'+str(fileNum)+'.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=';',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         
