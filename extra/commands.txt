@@ -10,6 +10,14 @@ java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_soluti
 java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution.csv
 java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution.csv
 
+
+Simulated Annealing best solutions commands
+java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/best_simulated_annealing/100_5_14_25_solution.csv
+java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/best_simulated_annealing/100_5_19_25_solution_50.csv
+java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/best_simulated_annealing/210_5_33_25_solution_88.csv
+java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/best_simulated_annealing/210_5_44_25_solution_18.csv
+java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/best_simulated_annealing/360_5_71_25_solution_50.csv
+
 python main.py 1 ./csv/toy1.csv 
 java -jar validator.jar ./csv/toy1.csv ./csv_solutions/toy1_solution.csv
 
@@ -42,6 +50,12 @@ Simulated Annealing(300sec, 1 random geen average):#math exponent
 4325
 7430
 
+Simulated Annealing (300sec , 100 random with average):
+8770, avg: 8980
+5615, avg: 5872.35
+9940, avg: 10877.55
+4045, avg: 4635.35
+7410, avg: 8557.95
 
 Tabu(30sec):
 9365
