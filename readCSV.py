@@ -1,4 +1,3 @@
-
 import csv
 def readCSV(Car,Reservation,f = 'toy1.csv'):
     reservationList=[]
@@ -93,17 +92,25 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     return cars, reservatieLijst,options,Zones
 
 def average(csvFile):
-    num , sum=0, 0
+    num , sum =0, 0
+    min=99999999999
     csvFile = csvFile.split('/')[-1]
     csvFile = csvFile.split('.')[0]
-    for i in range(2):
+    for i in range(100):
         file= './csv_solutions/'+csvFile+'_solution_'+str(i+1)+'.csv'
         print(file)
         with open(file, mode='r') as csv_file:
             csv_reader = csv.reader(csv_file , delimiter=";")
             for row in csv_reader:
-                sum+=int(row[0])
+                cost=int(row[0])
+                sum+=cost
                 num+=1
+                if(cost<min):
+                    min=cost
+                    csvNum=i+1
                 break
+                
 
-    return sum/num    
+    return sum/num , min , csvNum
+
+    

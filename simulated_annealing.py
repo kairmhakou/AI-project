@@ -11,7 +11,7 @@ from Printer import Printer
 import random
 import copy
 
-import  matplotlib.pyplot as plt
+# import  matplotlib.pyplot as plt
 from Cost import Cost
 from Code import Code
 import time
@@ -161,7 +161,7 @@ class Simulated_Annealing:
                         State.backup(newCost)
                         
                         if(newCost<State.result):
-                            print("New Best:",newCost,end = "->")
+                            # print("New Best:",newCost,end = "->")
                             State.setBestResult(newCost)
                     else:
                         
@@ -209,13 +209,13 @@ class Simulated_Annealing:
                 #of deze 
                 numOfIteration +=1.2
 
-                print(numOfIteration)
+                # print(numOfIteration)
                 temperatureList.append(t)
                 probabilityList.append(minProbability)
                 iterations.append(numOfIteration)
                 
                 times.append(time.perf_counter()-start)
-                print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
+                # print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
                 
         """
         plt.figure(1)

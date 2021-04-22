@@ -1,0 +1,10 @@
+100_5_14_25
+average cost  8980.0 , best cost  8770  best csv  "csv_solution/best"
+100_5_19_25
+average cost  5872.35 , best cost  5615  best csv  50
+210_5_33_25
+average cost  10877.55 , best cost  9940  best csv  88
+210_5_44_25
+average cost  4635.35 , best cost  4045  best csv  18
+360_5_71_25
+average cost  8557.95 , best cost  7410  best csv  50

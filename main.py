@@ -4,7 +4,7 @@ import time
 
 import sys
 #
-from readCSV import average, readCSV
+from readCSV import readCSV , average
 from writeCSV import writeCSV
 from Car import Car
 from Reservation import Reservation
@@ -129,18 +129,17 @@ def main(argTime,argFile,fileNum):
 if __name__ == "__main__":
     rond =0
     fileNum= 0
-    
-    while(rond <2):
+    while(rond <100):
         Reservation.id =0
         Car.id =0
         argTime=int(sys.argv[1])
         argFile=sys.argv[2]
-        #argTime=300
-        #argFile='./csv/100_5_14_25.csv'
+        averageCost, bestCost, bestCsvNum = average(argFile) 
+        print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
         State.reset()
         Car.zoneIDtoADJ=[]
         fileNum+=1
         main(argTime,argFile , fileNum)
         rond+=1
-    averageCost = average(argFile) 
-    print('average cost ',averageCost) 
+    #the average of the costs generated from simulated annealing alogrithm
+        
