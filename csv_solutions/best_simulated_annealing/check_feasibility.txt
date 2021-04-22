@@ -1,0 +1,25 @@
+java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/best_simulated_annealing/100_5_14_25_solution.csv
+solution is feasible!
+solution cost: 8770
+
+
+java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/best_simulated_annealing/100_5_19_25_solution_50.csv
+solution is feasible!
+solution cost: 5615
+
+java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/best_simulated_annealing/210_5_33_25_solution_88.csv
+solution is feasible!
+solution cost: 9940
+
+java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/best_simulated_annealing/210_5_44_25_solution_18.csv
+solution is feasible!
+solution cost: 4045
+
+java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/best_simulated_annealing/360_5_71_25_solution_50.csv
+solution is feasible!
+solution cost: 7410
+
+
+
+
+
