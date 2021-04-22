@@ -11,7 +11,7 @@ from Printer import Printer
 import random
 import copy
 
-# import  matplotlib.pyplot as plt
+import  matplotlib.pyplot as plt
 from Cost import Cost
 from Code import Code
 import time
@@ -21,8 +21,11 @@ from State import State
 #global variables
 START_TEMPERATURE = 100 #100
 END_TEMPERATURE= 0
-NUM_ITERATIONS= 25
+NUM_ITERATIONS= 125
 COOLING_RATE = 0.995#Moet lichtelijk anders zijn voor elk probleem 
+
+MIN_ITERATIONS = 10
+MAX_ITERATIONS = 500
 """
 @Karim
 Een van de paramters moet 'dynamish' zijn/ worden aangepast 
@@ -121,15 +124,17 @@ class Simulated_Annealing:
             probabilityList = []
             iterations =[] #for diff/t values
             times = [0]
+
             temperatureList.append(t)
             probabilityList.append(1)
-            iterations.append(0)
-            minProbability = 99999999
-            numOfIteration=1
+            minProbability = 1#99999999
             
+            numOfIteration=1
+            iterations.append(numOfIteration)
             
             
             while t > END_TEMPERATURE:
+                
                 if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
@@ -182,9 +187,9 @@ class Simulated_Annealing:
 
                     i += 1
                 #Independant of problem size
-                secondsPassed = int((time.perf_counter()-start)/(self.maxtime/150))
-                t = 100*(1.03**(-secondsPassed))    #https://www.desmos.com/calculator/3fisjexbvp
-                
+                secondsPassed = time.perf_counter()-start
+                #t = 100*(1.03**(-secondsPassed))    #https://www.desmos.com/calculator/3fisjexbvp
+                t = 110*(1.01**((-secondsPassed/self.maxtime)*300))- 5.4 # y=110\left(1.01^{-x}\right)-5.4
                     
                 # Gometric
                 #t *= COOLING_RATE 
@@ -207,22 +212,23 @@ class Simulated_Annealing:
                 # numOfIteration= math.ceil(numOfIteration)
                 
                 #of deze 
-                numOfIteration +=1.2
-
+                #numOfIteration +=1.2
+                
+                numOfIteration = MIN_ITERATIONS + ((MAX_ITERATIONS-MIN_ITERATIONS)/MAX_ITERATIONS)*secondsPassed#y=25+\frac{\left(100-25\right)}{300}x
                 # print(numOfIteration)
                 temperatureList.append(t)
                 probabilityList.append(minProbability)
                 iterations.append(numOfIteration)
                 
                 times.append(time.perf_counter()-start)
-                # print(time.perf_counter()-start,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
+                #print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
                 
         """
         plt.figure(1)
-        plt.plot( probabilityList, tempratureList, 'bo')
+        plt.plot( probabilityList, temperatureList, 'bo')
         plt.show()
         plt.figure(2)
-        plt.plot(tempratureList, iterations)
+        plt.plot(temperatureList, iterations)
         plt.show()
         plt.figure(3)
         plt.plot(probabilityList, iterations)
@@ -230,13 +236,16 @@ class Simulated_Annealing:
         """
         """
         #Moet in de tijd lijken op de exponentiele daling niet ten opzichte van het aantal iteraties
-        plt.figure(4)
-        print(tempratureList)
-        print(times)
-        plt.plot(tempratureList, times)
+        print(probabilityList)
+        plt.plot(times,iterations)
+        plt.show()
+        plt.plot(times,temperatureList)
+        plt.show()
+        plt.plot(times, probabilityList)
         plt.show()
         """
         return State.resultRlist , State.resultCars
+        
     def sort(self,array):
         if len(array)<2:
             return array

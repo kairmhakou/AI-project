@@ -4,11 +4,11 @@ python main.py 300 ./csv/210_5_33_25.csv
 python main.py 300 ./csv/210_5_44_25.csv 
 python main.py 300 ./csv/360_5_71_25.csv 
 
-java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution.csv
-java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution.csv
-java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution.csv
-java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution.csv
-java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution.csv
+java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution_1.csv
+java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution_1.csv
+java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution_1.csv
+java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution_1.csv
+java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution_1.csv
 
 
 Simulated Annealing best solutions commands
@@ -29,40 +29,12 @@ Beste van studenten vorige jaren:
 4210
 7655
 
-Simulated Annealing(30sec, 1 random geen average):
-9545
-6695
-12500
-6520
-12835
-
-Simulated Annealing(300sec, 1 random geen average):#exponential cooling
-9020,9070,9130
-6210,6170,6230
-12035,12040,12670
-6080,5615,6040,
-10480,10555,10640
-
-Simulated Annealing(300sec, 1 random geen average):#math exponent
-8915
-6020
-9860
-4325
-7430
-
 Simulated Annealing (300sec , 100 random with average):
 8770, avg: 8980
 5615, avg: 5872.35
 9940, avg: 10877.55
 4045, avg: 4635.35
 7410, avg: 8557.95
-
-Tabu(30sec):
-9365
-6400
-12745
-5800
-11670
 
 Tabu(300sec):
 9325

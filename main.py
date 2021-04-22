@@ -22,6 +22,7 @@ class Solver:
         self.maxtime = maxtime
         print(maxtime)
         self.f = f
+        print(f)
         State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,self.f)
         
         self.tabu_search = Tabu_Search(self)
@@ -125,21 +126,35 @@ def main(argTime,argFile,fileNum):
     writeCSV(solver.f,fileNum)
     Printer.printFinal(solver,Code)
     
-  
-if __name__ == "__main__":
+def oneTime():
+    argTime=int(sys.argv[1])
+    argFile=sys.argv[2]
+    main(argTime,argFile ,  1)
+def averageX():
     rond =0
     fileNum= 0
-    while(rond <100):
+    
+    argTime=int(sys.argv[1])
+    argFile=sys.argv[2]
+    while(rond <10):
         Reservation.id =0
         Car.id =0
-        argTime=int(sys.argv[1])
-        argFile=sys.argv[2]
-        averageCost, bestCost, bestCsvNum = average(argFile) 
-        print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
         State.reset()
+        averageCost, bestCost, bestCsvNum = average(argFile,rond) 
+        print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
         Car.zoneIDtoADJ=[]
         fileNum+=1
         main(argTime,argFile , fileNum)
         rond+=1
-    #the average of the costs generated from simulated annealing alogrithm
+    
+    
+    #the average of the costs generated from simulated annealing alogrithm 
+    
+if __name__ == "__main__":
+    #oneTime()
+    averageX() 
+ 
+  
+
+    
         

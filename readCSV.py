@@ -91,12 +91,14 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         k+=1
     return cars, reservatieLijst,options,Zones
 
-def average(csvFile):
+def average(csvFile,rond):
+    if(rond==0):
+        return 0,999999999,0
     num , sum =0, 0
     min=99999999999
     csvFile = csvFile.split('/')[-1]
     csvFile = csvFile.split('.')[0]
-    for i in range(100):
+    for i in range(rond):
         file= './csv_solutions/'+csvFile+'_solution_'+str(i+1)+'.csv'
         print(file)
         with open(file, mode='r') as csv_file:
@@ -110,7 +112,7 @@ def average(csvFile):
                     csvNum=i+1
                 break
                 
-
+    
     return sum/num , min , csvNum
 
     
