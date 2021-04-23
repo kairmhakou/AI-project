@@ -10,7 +10,6 @@ java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_soluti
 java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution_1.csv
 java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution_1.csv
 
-
 Simulated Annealing best solutions commands
 java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/best_simulated_annealing/100_5_14_25_solution.csv
 java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/best_simulated_annealing/100_5_19_25_solution_50.csv
@@ -35,6 +34,19 @@ Simulated Annealing (300sec , 100 random with average):
 9940, avg: 10877.55
 4045, avg: 4635.35
 7410, avg: 8557.95
+
+new Simulated Annealing:( 2 random) MIN 10 MAX 500
+9090,8950
+5930,5905
+10055,10790
+3850,4090
+6995,6735
+
+    (50 average)
+average cost 8935.6, best cost 8795
+
+new Simulated Annealing:(50 average) MIN 100 MAX 1000
+average cost , best cost 5
 
 Tabu(300sec):
 9325

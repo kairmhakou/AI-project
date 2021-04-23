@@ -136,7 +136,7 @@ def averageX():
     
     argTime=int(sys.argv[1])
     argFile=sys.argv[2]
-    while(rond <10):
+    while(rond <50):
         Reservation.id =0
         Car.id =0
         State.reset()
@@ -146,7 +146,11 @@ def averageX():
         fileNum+=1
         main(argTime,argFile , fileNum)
         rond+=1
-    
+    averageCost, bestCost, bestCsvNum = average(argFile,rond) 
+    file1 = open("averages.txt","a")#write mode
+    string = 'average cost '+str(averageCost)+ ', best cost '+str(bestCost)+ ' best csv ' + str(bestCsvNum)
+    file1.write(string+"\n")
+    file1.close()
     
     #the average of the costs generated from simulated annealing alogrithm 
     

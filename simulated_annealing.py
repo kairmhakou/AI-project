@@ -5,91 +5,63 @@ Created on Tue Mar 23 22:46:11 2021
 
 @author: dehan
 # """
-# #%%
-# from main import Solver
-from Printer import Printer
 import random
 import copy
-
-import  matplotlib.pyplot as plt
-from Cost import Cost
-from Code import Code
 import time
 import math
+import matplotlib.pyplot as plt
+
+from Cost import Cost
 from Car import Car
 from State import State
-#global variables
-START_TEMPERATURE = 100 #100
+
+START_TEMPERATURE = 100 
 END_TEMPERATURE= 0
-NUM_ITERATIONS= 125
-COOLING_RATE = 0.995#Moet lichtelijk anders zijn voor elk probleem 
 
-MIN_ITERATIONS = 10
-MAX_ITERATIONS = 500
-"""
-@Karim
-Een van de paramters moet 'dynamish' zijn/ worden aangepast 
-bv 100_5_14_25.csv is vrij klein => localSearch is snel klaar => numIterations worden sneller uitgevoerd dan bij een groot probleem ie. 360_5_71_25.csv
- als het x keer sneller is wordt de temperatuur x keer meer afgekoelt bij kleinere problemen
-Ik denk dat de COOLING_RATE afhankelijk moet zijn van hoe lang het duurt om 'numIteration' uit te voeren
-    tijd meten kan met startpunt =  time.perf_counter()
+MIN_ITERATIONS = 100#10
+MAX_ITERATIONS = 1000#500
 
-"""
-
+#NUM_ITERATIONS= 125
+#COOLING_RATE = 0.995
 
 class Simulated_Annealing:
     def __init__(self,maxtime ):
         self.maxtime = maxtime
-        
-        # self.sortedResPen = self.sort(State.rlist)
     
-    def hill_climbing_zonder_zones(self):
+    def hill_climbing(self):
+        best = 0 #improvement => >0
         #All possible 'assigned car' swaps
-
+        #   Can only lead to an improvement if r is currently notAssigned or assigned to Adjecent zone
         for r in State.rlist:
-            for cid in State.options[r.id]:
-                c = State.cars[cid]
-                if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
-                    
-                    cost =  Cost.costToAddR(c,r)
-                    #print(cost)
-                    if(cost>0):#any improvement
-                        #print(r.id,":",c.id)
-                        return c,None,r
-        return None,None,None
-    def hill_climbing(self, experimental = 1):
-        best = 0 #verbetering >0
-        #All possible 'assigned car' swaps
-        for r in State.rlist:
-            for cid in State.options[r.id]:
-                c = State.cars[cid]
-                if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
-                    cost = Cost.costToAddR(c,r)
-                    if(cost>best):
-                        return c,None,r
+            if(r.notAssigned or r.adjZone):
+                for cid in State.options[r.id]:
+                    c = State.cars[cid]
+                    if(r.zone == c.zone or r.zone in Car.zoneIDtoADJ[c.zone]):    
+                        if(Cost.costToAddR(c,r)>best):
+                            return c,None,r
+            
         #All possible 'assigned car' swaps assign to adj zone
-        if(experimental):
-            for r in State.rlist:
-                if(r.notAssigned):
-                    adjZones = Car.zoneIDtoADJ[r.zone]
-                    for cid in State.options[r.id]:
-                        c = State.cars[cid]
-                        for zid in adjZones:         
-                            cost = Cost.costAddRSetZ(c,r,zid)
-                            if(cost>best):
-                                return c,zid,r  
+        #   Can only lead to an improvement if r is currently notAssigned
+        for r in State.rlist:
+            if(r.notAssigned):
+                adjZones = Car.zoneIDtoADJ[r.zone]
+                for cid in State.options[r.id]:
+                    c = State.cars[cid]
+                    for zid in adjZones:         
+                        if(Cost.costAddRSetZ(c,r,zid)>best):
+                            return c,zid,r  
                           
-        #All sensible 'car zone' swaps
+        #All sensible 'carzone' swaps
         for c in State.cars:          
             for rid in c.res:
                 r = State.rlist[rid]
-                cost =  Cost.costToSetZone(c,r.zone)
-                if(cost>best):
+                if(Cost.costToSetZone(c,r.zone)>best):
                     return c,r.zone,None
-        
+        #Reached peak
         return None,None,None
 
     def localSearch(self):
+        #Repeat hill_climbing to a local optimum
         while(1):
             bestc,bestz,bestr = self.hill_climbing()
             if(bestz is not None):
@@ -105,74 +77,58 @@ class Simulated_Annealing:
        
             
     def simulatedAnnealing(self):
+        lenZones = len(Car.zoneIDtoADJ)-1
+        lenCars = len(State.cars)-1
+        
         currCost = Cost.getCost(State.rlist)	
         State.setBestResult(currCost)        
         State.backup(currCost)
-        print(len(State.rlist))
         start = time.perf_counter()
         
         while(1):
             if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
                     break   #return because the time is up
-            #select random  zone and assign it to random car 
-            t = START_TEMPERATURE
-            
-            
-            #list for the plot
-            temperatureList =[]
-            probabilityList = []
-            iterations =[] #for diff/t values
-            times = [0]
 
-            temperatureList.append(t)
-            probabilityList.append(1)
+            t = START_TEMPERATURE
+            numOfIteration=MIN_ITERATIONS
             minProbability = 1#99999999
-            
-            numOfIteration=1
-            iterations.append(numOfIteration)
-            
-            
+            #list for the plot
+            # temperatureList =[t]
+            # probabilityList = [minProbability]
+            # iterations =[numOfIteration] #for diff/t values
+            # times = [0]
+
             while t > END_TEMPERATURE:
-                
                 if((time.perf_counter()-start) > self.maxtime):
-                    print('~~timeisup~~')
-                    break   #return because the time is up
-                i =0 
+                    break #return because the time is up
                 
+                i =0 
                 while(i < numOfIteration):
                     if((time.perf_counter()-start) > self.maxtime):
-                        print('~~timeisup~~')
-                        break   #return because the time is up
+                        break #return because the time is up
                     
                     for _ in range(1):
-                        randomZoneIndex = random.randint(0, len(Car.zoneIDtoADJ)-1)
-                        randomCarIndex = random.randint(0, len(State.cars)-1)
-                        if(State.cars[randomCarIndex].zone == randomZoneIndex):
+                        randomZoneIndex = random.randint(0, lenZones)
+                        randomCarIndex = random.randint(0, lenCars)
+                        if(State.cars[randomCarIndex].zone == randomZoneIndex):#Allready in zone
                             continue
-                        c1 = State.cars[randomCarIndex]
-                        c1.setZone(randomZoneIndex)
+                        State.cars[randomCarIndex].setZone(randomZoneIndex)
 
-                    self.localSearch()
+                    self.localSearch()# Find local optimum
+                    
                     newCost= Cost.getCost(State.rlist)
                     diff = newCost - currCost                    
-                    
-                    if diff < 0:
-                        
-                        #print("diff < 0" , newCost , diff, State.getBest())
-                        # print("new peak")
-                        
+                    if diff < 0:#improvement
                         currCost = newCost
                         State.backup(newCost)
-                        
                         if(newCost<State.result):
-                            # print("New Best:",newCost,end = "->")
                             State.setBestResult(newCost)
-                    else:
-                        
+                            
+                    else:#worse
                         probability= math.exp(-((diff)/t))
                         # print(probability)
-                        if(random.uniform(0,1) < probability):
+                        if(random.uniform(0,1) < probability): #accept anyway
                             # print("probability" , probability)
                             if(probability<minProbability):
                                 minProbability =probability
@@ -180,63 +136,50 @@ class Simulated_Annealing:
                             State.backup(newCost)
                             currCost = newCost
                         else:
-                            
-                            State.restore()
-                            currCost = Cost.getCost(State.rlist)
-
+                            currCost = State.restore() #Go back to previous local peaks
 
                     i += 1
-                #Independant of problem size
+                #Independant of problem size by using secondspassed/given maxtime
+                #   mapped onto math functions https://www.desmos.com/calculator
                 secondsPassed = time.perf_counter()-start
-                #t = 100*(1.03**(-secondsPassed))    #https://www.desmos.com/calculator/3fisjexbvp
-                t = 110*(1.01**((-secondsPassed/self.maxtime)*300))- 5.4 # y=110\left(1.01^{-x}\right)-5.4
-                    
-                # Gometric
-                #t *= COOLING_RATE 
+                secondsPassedScaled = (secondsPassed/self.maxtime)*300
+                
+                ##########################################################################
+                # 1) Exponential cooling
+                t = 110*(1.01**(-secondsPassedScaled))- 5.4 # y=110\left(1.01^{-x}\right)-5.4
+                
+                # 2) Logaritmic cooling:
+                # t = -44*math.log(0.6*(secondsPassedScaled+1.5),10)+99.5 # y=-44\cdot\log\left(0.6\left(x+1.5\right)\right)+99.5
+                
+                # 3) Linear cooling:
+                #t = START_TEMPERATURE + ((END_TEMPERATURE-START_TEMPERATURE)/300)*secondsPassedScaled
+                
+                # 4) Gometric: ni zeker wat Gometric is maar werkt wel goed
+                #t = 0.99**(secondsPassedScaled-460)-4.8 # y=0.99^{x\ -\ 460\ }-4.8
+                #   t *= COOLING_RATE 
 
-                #de beste cooling mainer
-                # exponential cooling
-                #t= START_TEMPRATURE * COOLING_RATE**numOfIteration 
-                
-                # logarithmical cooling
-                # t= startTemperature/(1 * math.log( numOfIteration+1))
-                
+                # Linear increase of iterations over time
+                numOfIteration = MIN_ITERATIONS + ((MAX_ITERATIONS-MIN_ITERATIONS)/300)*secondsPassedScaled#y=25+\frac{\left(100-25\right)}{300}x
+
+
+                #Not (yet) independant of problem size
                 # #linear multiplicative  cooling
                 # t= startTemperature / (1+coolingRate*numOfIteration)
 
                 # Quadratic multiplicative cooling
                 # t= startTemperature / (1+coolingRate*(numOfIteration)**2)
-
-                #deze manier werkt ni denk ik; verschil in t is te klein om effect te hebben op numOfIteration => t verandert niet => numIt =>...
-                # numOfIteration = NUM_ITERATIONS *(1 - t/START_TEMPRATURE) +10
-                # numOfIteration= math.ceil(numOfIteration)
+                ##########################################################################
                 
-                #of deze 
-                #numOfIteration +=1.2
+                #append to list for matplotlib graph
+                # temperatureList.append(t)
+                # probabilityList.append(minProbability)
+                # iterations.append(numOfIteration)
+                # times.append(time.perf_counter()-start)
                 
-                numOfIteration = MIN_ITERATIONS + ((MAX_ITERATIONS-MIN_ITERATIONS)/MAX_ITERATIONS)*secondsPassed#y=25+\frac{\left(100-25\right)}{300}x
-                # print(numOfIteration)
-                temperatureList.append(t)
-                probabilityList.append(minProbability)
-                iterations.append(numOfIteration)
-                
-                times.append(time.perf_counter()-start)
-                #print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
-                
+                #print progress
+                print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
         """
-        plt.figure(1)
-        plt.plot( probabilityList, temperatureList, 'bo')
-        plt.show()
-        plt.figure(2)
-        plt.plot(temperatureList, iterations)
-        plt.show()
-        plt.figure(3)
-        plt.plot(probabilityList, iterations)
-        plt.show()
-        """
-        """
-        #Moet in de tijd lijken op de exponentiele daling niet ten opzichte van het aantal iteraties
-        print(probabilityList)
+        #Graph x - Time
         plt.plot(times,iterations)
         plt.show()
         plt.plot(times,temperatureList)
@@ -244,22 +187,6 @@ class Simulated_Annealing:
         plt.plot(times, probabilityList)
         plt.show()
         """
+        
         return State.resultRlist , State.resultCars
-        
-    def sort(self,array):
-        if len(array)<2:
-            return array
-        
-        middle = array[random.randint(0, len(array)-1)].P1
-        low , high , same =[], [] ,[]
-
-        for r in array:
-            if r.P1>middle:
-                high.append(r)
-            elif r.P1<middle:
-                low.append(r)
-            else:
-                same.append(r)
-
-        return self.sort(high) + same + self.sort(low)
 

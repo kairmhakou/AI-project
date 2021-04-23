@@ -55,7 +55,7 @@ class Car:
             if(nres.start < r.end and r.start < nres.end):#(nres.overlap(r.start,r.end)):
                 temprID = self.res.pop(i)
                 tempr = State.rlist[temprID]
-                tempr.carID = -1#None
+                tempr.carID = -1
                 tempr.notAssigned = True
                 tempr.adjZone =False
                 i-=1
@@ -65,12 +65,12 @@ class Car:
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres.id)
 
-        State.RassignCount[nres.id]+=1
+        #State.RassignCount[nres.id]+=1
 
         return 1
 
     def setZone(self,zone):
-        self.zone= zone
+        self.zone = zone
         i = 0
         while(i<len(self.res)):
             r = State.rlist[self.res[i]]
@@ -81,7 +81,7 @@ class Car:
             else:
                 r.adjZone = False
                 r.notAssigned = True
-                r.carID = -1#None
+                r.carID = -1
                 self.res.pop(i)
                 i-=1
             i+=1        

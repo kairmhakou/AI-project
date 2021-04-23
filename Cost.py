@@ -36,11 +36,11 @@ class Cost:
                 cost += r.costNewZone(zone)
         
         return cost
+        
     def costToSetZone(c,zone):
         cost = 0
         for rid in c.res:
-            r = State.rlist[rid]
-            cost += r.costNewZone(zone)
+            cost += State.rlist[rid].costNewZone(zone)
         return cost
     
     def costToAddR(c,nres):

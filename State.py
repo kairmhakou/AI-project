@@ -24,6 +24,7 @@ class State:
     def restore():
         State.cars = [x.clone() for x in State.backupCars]
         State.rlist = [x.clone() for x in State.backupRlist]
+        return State.backupCost
     def backup(cost):
         State.backupCars = [x.clone() for x in State.cars]
         State.backupRlist = [x.clone() for x in State.rlist]

@@ -1,0 +1,1 @@
+average cost 8935.6, best cost 8795 best csv 36
