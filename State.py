@@ -5,12 +5,8 @@ Created on Sun Mar 14 14:03:22 2021
 @author: Loic Dehan
 """
 
-
-
-import copy
 class State:
     Zones = 0
-    RassignCount = [0]*1000
     
     maxC = 9999999999999999999
     options = None
@@ -37,8 +33,7 @@ class State:
 
     def reset():
         State.Zones = 0
-        State.RassignCount = [0]*1000
-    
+
         State.maxC = 9999999999999999999
         State.options = None
         State.cars,State.rlist,State.bestCost = None,None,State.maxC  

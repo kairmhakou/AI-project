@@ -27,17 +27,15 @@ class Printer:
         print('   zoneStrtoID',Car.zoneStrtoID)
         print('   zoneIDtoADJ',Car.zoneIDtoADJ)
         print('\n'*2)
-    def printFinal(solver,Code):
-        
+    def printFinal():
         print("bestc:",State.result)
         print("----------------"*2)
-        #Printer.printResult(solver.bestrlist,solver.bestcars)
         
 if __name__ == "__main__":
-    random.seed = 10 
+    random.seed(10) 
     print(random.random())
     print(random.random())
-    random.seed = 10 
+    random.seed(10) 
     print("----")
     print(random.random())
     print(random.random())

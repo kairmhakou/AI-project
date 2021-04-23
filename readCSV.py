@@ -14,16 +14,16 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
                 tempReservation=[]
                 for i in range(len(row)):
                     
-                    if(i==5): #index of the auto's list
-                        autos= row[i].split(',')
-                        tempReservation.append(autos)
+                    if(i==5): #index of the car's list
+                        cars= row[i].split(',')
+                        tempReservation.append(cars)
                     else:
                         tempReservation.append(row[i])
                 reservationList.append(tempReservation)
             elif row[0][0] == "z": # zone
                 tempZone=[]
                 tempZone.append(row[0])
-                zones= row[1].split(',')
+                zones = row[1].split(',')
                 tempZone.append(zones)
                 zonesList.append(tempZone)
             elif row[0][0] == "c": # car
@@ -40,6 +40,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         i+=1
        
     i = 0
+    Car.zoneIDtoADJ = []
     for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
         AdjectentZone = zone[1] 
         #convert string IDs to numerical IDs
@@ -52,7 +53,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     j = 0
     for car in carsList: #read car lines of csv 
         cars.append(Car())
-        c = car #carID
+        c = car
         Car.carIDtoStr[j] =  c
         Car.carStrtoID[c] = j
         j+=1
@@ -67,15 +68,6 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         duration = res[4]
         P1 = int(res[6])
         P2 = int(res[7])
-        #What makes sets faster than lists? https://stackoverflow.com/questions/8929284/what-makes-sets-faster-than-lists
-
-        """
-        https://stackoverflow.com/questions/2831212/python-sets-vs-lists#:~:text=Sets%20are%20significantly%20faster%20when,is%20faster%20for%20your%20situation.
-        Sets are significantly faster when it comes to determining if an object is present in the set 
-        (as in x in s ), 
-        but are slower than lists when it comes to iterating over their contents.
-        
-        """
 	
         OptionalCars = []
     
@@ -85,7 +77,6 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         r = Reservation(zone,day,startTime,duration,P1,P2)
     
         reservatieLijst.append(r) 
-        #Kost.voegtoe(r)
         Reservation.resIDtoStr[k] = ID
            
         k+=1

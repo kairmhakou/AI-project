@@ -1,1 +1,12 @@
 average cost 8935.6, best cost 8795 best csv 36
+average cost 11280.0, best cost 11080 best csv 5
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11902.0, best cost 11190 best csv 2
+average cost 11535.0, best cost 11190 best csv 2
+average cost 9649.0, best cost 9350 best csv 1
+average cost 9646.0, best cost 9350 best csv 1
+average cost 9350.0, best cost 9350 best csv 1

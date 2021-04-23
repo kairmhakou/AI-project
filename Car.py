@@ -65,7 +65,7 @@ class Car:
         nres.adjZone = nres.zone!=self.zone
         self.res.append(nres.id)
 
-        #State.RassignCount[nres.id]+=1
+        State.RassignCount[nres.id]+=1
 
         return 1
 

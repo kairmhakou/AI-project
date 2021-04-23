@@ -6,7 +6,7 @@ Created on Sun Mar 14 14:03:22 2021
 """
 from State import State
 
-class Code:
+class Tabu:
     tabuList = set()
    
     def formCode():       
@@ -19,12 +19,12 @@ class Code:
         
     def add(code):
         c = ''.join(map(str,code[0])) + ''.join(map(str,code[1]))
-        Code.tabuList.add(c)
+        Tabu.tabuList.add(c)
         return 1
 
     def inMemory(code):
         codeString = ''.join(map(str,code[0])) + ''.join(map(str,code[1]))
-        return codeString in Code.tabuList
+        return codeString in Tabu.tabuList
 
 if __name__ == "__main__":
     pass

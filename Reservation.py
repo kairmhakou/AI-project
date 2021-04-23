@@ -6,7 +6,7 @@ class Reservation:
     def __init__(self,zone,day,start,duration,P1,P2,inc = 1):
         self.id = Reservation.id
         Reservation.id += inc
-        self.carID = -1#None
+        self.carID = -1
         self.zone = zone
         if(day!=-1):
             self.start = int(day)*1440+int(start) #convert to minutes (24*60 minutes per day)
@@ -14,8 +14,8 @@ class Reservation:
         self.P1 = P1  # cost for not assigning Reservation
         self.P2 = P2  # cost for assigning to adjecent zone
         
-        self.notAssigned = True #1 -> not assigned
-        self.adjZone = False #1 -> assigned to adjecent zone
+        self.notAssigned = True #True -> not assigned
+        self.adjZone = False    #True -> assigned to adjecent zone
 
     def clone(self):
         cloneRes = Reservation(self.zone,-1,self.start,-1,self.P1,self.P2,inc = 0)
@@ -38,8 +38,6 @@ class Reservation:
 
     def _cost(self):
         return self.notAssigned*self.P1 + self.adjZone*self.P2
-
-
     
     def costNewZone(self,zone):
         #How the cost for this reservation improves if the new zone is assigned

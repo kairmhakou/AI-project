@@ -7,17 +7,10 @@ Created on Sun Mar 14 10:27:23 2021
 from State import State
 import time
 class Cost:
-    timeSpentGet = 0
-    countGet = 1
     def getCost(rlist):#Kost berekenen
-        Cost.countGet+=1
-        tempStart = time.perf_counter()
-        
         cost=0
         for r in rlist:
             cost += r.notAssigned*r.P1 + r.adjZone*r.P2#r.cost()
-        Cost.timeSpentGet+= time.perf_counter()-tempStart   
-        
         return cost  
             
     def costAddRSetZ(c,nres,zone):

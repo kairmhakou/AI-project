@@ -49,15 +49,36 @@ new Simulated Annealing:(50 average) MIN 100 MAX 1000
 average cost , best cost 5
 
 Tabu(300sec):
-9325
-6050
-10830
-5495
-9040
+9070
+5625
+11015
+5455
+9890
 
-Iterated_Tabu(300sec):
-9025
+Iterated_Tabu(300sec):/10
+9015
+5625
+10860
+4935
+8885
+
+Iterated_Tabu(300sec):/8
+8945
 5625
 11145
-4975
-8960
+5275
+8400
+
+Iterated_Tabu(300sec):/5
+8775
+5625
+11050
+5110
+8275
+
+Iterated_Tabu(300sec):/3
+8775
+5625
+11050
+5110
+8275

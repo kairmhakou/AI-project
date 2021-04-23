@@ -1,10 +1,11 @@
 import copy
-from Cost import Cost
 import time
-from Code import Code
-from Car import Car
 import random
+
+from Cost import Cost
+from Car import Car
 from State import State
+
 class Great_deluge:
     def __init__(self,solver):
         self.solver = solver
