@@ -43,8 +43,10 @@ class Reservation:
         #How the cost for this reservation improves if the new zone is assigned
         if(self.zone==zone):
             return self.notAssigned*self.P1 + self.adjZone*self.P2  -   0
+            
         elif(self.zone in Reservation.zoneIDtoADJ[zone]):
             return self.notAssigned*self.P1 + self.adjZone*self.P2  -   self.P2
+            
         else:
             return self.notAssigned*self.P1 + self.adjZone*self.P2  -   self.P1
     

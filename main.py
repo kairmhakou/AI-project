@@ -9,7 +9,6 @@ from Car import Car
 from Reservation import Reservation
 from Cost import Cost
 from Tabu import Tabu
-from Printer import Printer
 from tabu_search import Tabu_Search
 from simulated_annealing import Simulated_Annealing
 from great_deluge import Great_deluge
@@ -23,15 +22,15 @@ class Solver:
         self.tabu_search = Tabu_Search(self)
         self.simulated_annealing = Simulated_Annealing(self.maxtime)
         self.great_deluge = Great_deluge(self)
-        """
+        
         self.sorted_rlist = []
-        for e in self.rlist:
+        for e in State.rlist:
             index = 0
             for i in self.sorted_rlist:
-                if(len(self.options[e.id])<len(self.options[i.id])):
+                if(e.P1>i.P1):
                     break
                 index+=1
-            self.sorted_rlist.insert(index,e)"""
+            self.sorted_rlist.insert(index,e)
 
     def freeData(self):
         for r in State.rlist:
@@ -41,54 +40,56 @@ class Solver:
         for c in State.cars:
             c.res=[]
 
-    def initialSolution():
-        for r in State.rlist:
+    def initialSolution(self):
+        # Voor elke r:
+        #   Not assigned -> kijk of er een auto in juiste zone staat -> geen overlap? -> add
+        #   Not assigned -> kijk of er een auto in adj zone staat -> geen ovlerap -> add
+        #   Kijk of er een auto nog geen reservaties heeft -> verplaats auto naar r.zone en add
+        
+        #Volgorde r.id(State.rlist)             : #32690 -> 15290
+        #Volgorde grootste P1(self.sorted_rlist): #32690 -> 12360 
+        for r in self.sorted_rlist:
             if(r.notAssigned):
                 for cid in State.options[r.id]:
-                        c = State.cars[cid]
-                        if(not(c.overlap(r.start,r.end)) and (c.zone == r.zone or c.zone in Car.zoneIDtoADJ[r.zone])):
-                            c.addR(r)
-                            break   
-        for r in State.rlist:                
-            if(r.notAssigned):#could not be assigned to any car
-                for cid in State.options[r.id]:
-                        c = State.cars[cid]
-                        if(len(c.res)==0):#No other reservations so no problem
-                            c.setZone(r.zone)
-                            c.addR(r)
-                            break
-        for r in State.rlist:                
-            if(r.adjZone):#could not be assigned to any car
-                for cid in State.options[r.id]:
-                        c = State.cars[cid]
-                        if(not(c.overlap(r.start,r.end)) and (c.zone ==r.zone)):
-                            c.addR(r)
-                            break
-            if(r.adjZone):#could not be assigned to any car
-                for cid in State.options[r.id]:    
-                        c = State.cars[cid]           
-                        if(len(c.res)==0):#No other reservations so no problem
-                            c.setZone(r.zone)
-                            c.addR(r)
-                            break
-        
+                    c = State.cars[cid]
+                    if(not(c.overlap(r.start,r.end)) and (c.zone == r.zone or c.zone in Car.zoneIDtoADJ[r.zone])):
+                        c.addR(r)
+                        break   
+                    elif(len(c.res)==0):#No other reservations so no problem
+                        c.setZone(r.zone)
+                        c.addR(r)
+                        break
 
+        for r in self.sorted_rlist:                
+            if(r.adjZone):
+                for cid in State.options[r.id]:
+                        c = State.cars[cid]
+                        if(not(c.overlap(r.start,r.end)) and (c.zone == r.zone)):
+                            c.addR(r)
+                            break       
+                        elif(len(c.res)==0):#No other reservations so no problem
+                            c.setZone(r.zone)
+                            c.addR(r)
+                            break
+                            
 def main(argTime,argFile,fileNum):
     State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,argFile)
     State.RassignCount = [0]*len(State.rlist)
     
     solver = Solver(argFile,argTime)
     solver.freeData()
-    Solver.initialSolution()
-
+   
+    print("Pre-initial cose:",Cost.getCost(State.rlist))
+    solver.initialSolution()
+    print("initial cose:",Cost.getCost(State.rlist))
+    State.curCost = Cost.getCost(State.rlist)
     print("----------------"*2)#Choose Method
     
-    #solver.simulated_annealing.simulatedAnnealing()
+    solver.simulated_annealing.simulatedAnnealing()
     
-    #solver.Iterated_Tabu.Iterated_local_search()
-    #solver.Iterated_Tabu.Tabu_Search_base()
+    #solver.tabu_search.Tabu_Search_base()
     
-    solver.tabu_search.Iterated_local_search()
+    #solver.tabu_search.Iterated_local_search()
 
     # solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
     
@@ -96,7 +97,6 @@ def main(argTime,argFile,fileNum):
 
     print(Cost.getCost(State.resultRlist))
     writeCSV(argFile,fileNum)
-    #Printer.printFinal()
     
 def oneTime():
     argTime=int(sys.argv[1])

@@ -140,13 +140,12 @@ class Tabu_Search:
                     bestc.setZone(bestz)
                   
                 if(bestr is not None):
-
                     if(bestr.getCar()):#if currently assigned to a car, remove from rlist
                         bestr.getCar().res.remove(bestr.id)
                     #assign to new car
                     bestc.addR(bestr)
                     
-                else:#reached peak
+                if(bestz is None and bestr is None):#reached peak
                     break
                 if(newBackup):
                     finishBackup = 1

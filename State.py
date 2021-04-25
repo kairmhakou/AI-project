@@ -6,7 +6,7 @@ Created on Sun Mar 14 14:03:22 2021
 """
 
 class State:
-    Zones = 0
+    Zones = None
     
     maxC = 9999999999999999999
     options = None
@@ -16,7 +16,7 @@ class State:
     
     resultRlist,resultCars,result = None,None,maxC
     
-    curCode = None
+
     def restore():
         State.cars = [x.clone() for x in State.backupCars]
         State.rlist = [x.clone() for x in State.backupRlist]
@@ -32,7 +32,7 @@ class State:
         State.result = cost
 
     def reset():
-        State.Zones = 0
+        State.Zones = None
 
         State.maxC = 9999999999999999999
         State.options = None
