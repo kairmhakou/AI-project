@@ -85,13 +85,13 @@ def main(argTime,argFile,fileNum):
     State.curCost = Cost.getCost(State.rlist)
     print("----------------"*2)#Choose Method
     
-    solver.simulated_annealing.simulatedAnnealing()
+    #solver.simulated_annealing.simulatedAnnealing()
+    solver.tabu_search.Tabu_Search()
     
-    #solver.tabu_search.Tabu_Search_base()
+    #solver.tabu_search.random_restart()#unused
+    #solver.tabu_search.Tabu_Search_base()#unused
     
-    #solver.tabu_search.Iterated_local_search()
-
-    # solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)
+    # solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)#unused
     
     print("----------------"*2)
 

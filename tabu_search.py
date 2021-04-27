@@ -54,7 +54,7 @@ class Tabu_Search:
             Switch zone of car to an adjecent zone (unused)
         
         """
-        best = 0 #verbetering >0
+        best = 0 #Improvement >0
         currCost = Cost.getCost(State.rlist)
         #All possible 'assigned car' swaps assign to ideal zone
         for r in State.rlist:
@@ -76,6 +76,11 @@ class Tabu_Search:
                                 if(Tabu.inMemory(nextcode)):
                                     continue
                             return c,None,r,0,nextcode
+                    elif(len(c.res)==0):
+                        print("Theoretically possible, but never happens")  
+                        # check for tabu
+                        # move car to ideal zone of reservation
+                        # assign reservation to car
 
         #All possible 'assigned car' swaps assign to adj zone
         for r in State.rlist:
@@ -83,7 +88,7 @@ class Tabu_Search:
                 adjZones = Car.zoneIDtoADJ[r.zone]
                 for cid in State.options[r.id]:
                     c = State.cars[cid]
-                    for zid in adjZones:         
+                    for zid in adjZones:#Auto in aanliggende zone 
                         cost = Cost.costAddRSetZ(c,r,zid)
                         if(cost>best):
                             if(currCost - cost<State.backupCost):  
@@ -105,7 +110,7 @@ class Tabu_Search:
                                 if(Tabu.inMemory(nextcode)):
                                     continue
                             return c,zid,r,0,nextcode   
-        #All sensible 'car zone' swaps #overbodig?
+        #All sensible 'car zone' swaps 
         for c in State.cars:
             for rid in c.res:
                 zid = r.zone
@@ -154,7 +159,7 @@ class Tabu_Search:
                 elif(not(Tabu.add(Tabu.formCode()))):
                     print("iets fout met nextcode in localSearch")
                 
-            else: #least bad step away from local best
+            else: #least bad step away from local best (unused)
                 bestc,bestz = self.steepest_descent()
                 if(bestz is not None):
                     bestc.setZone(bestz)
@@ -197,26 +202,7 @@ class Tabu_Search:
             
             Tabu.add(Tabu.formCode())
 
-    def Tabu_Search_base(self):
-        start = time.perf_counter()
-        i = 0
-        while(1):     
-            tempStart = time.perf_counter()       
-            i+=1            
-            if((time.perf_counter()-start) > self.maxtime):
-                 print('~~timeisup~~')
-                 break   #return because the time is up 
-                 
-            self.localSearch() #find local minimum of cost 
-            cost = Cost.getCost(State.rlist)
-            if(cost<State.result):
-                State.setBestResult(cost)
-            self.localSearch(method = 1) # take 1 step that increases the cost the least
-            
-                
-            if(i%100==0):
-                print(time.perf_counter()-start,i,':',cost,State.result,State.backupCost)
-    def Iterated_local_search(self):
+    def Tabu_Search(self):
         sinceLast = time.perf_counter()
         prevBest = 999999999999999
 
@@ -257,10 +243,10 @@ class Tabu_Search:
             else:
                 State.restore()
 
-  
-            changed = self.perturbation()
+            #diversificatie
+            changed = self.diversificatie()
             
-            if(not(changed)):#All options for perturbation() are tabu
+            if(not(changed)):#No more neighbours for diversification()
                 print("=> leastAssigned")
                 self.leastAssigned(amount)
                 State.backup(Cost.getCost(State.rlist))    
@@ -292,7 +278,7 @@ class Tabu_Search:
                 bestc = c
                 bestr = r
         return bestc,bestr,minL
-    def perturbation(self):
+    def diversificatie(self):
         minL = 99999999999
         bestc = None
         bestr = None
@@ -325,15 +311,73 @@ class Tabu_Search:
             print("No Forced assign")           
             return 0
             
+    def least_Assigned_Restart(self):
+        i = 0
+        start = time.perf_counter()
+        while(1):         
+            i+=1            
+            if((time.perf_counter()-start) > self.maxtime):
+                 print('~~timeisup~~')
+                 break   #return because the time is up
+            if(not(self.findPeak(0))):
+                print("test")
+                self.leastAssigned(20)
+            cost = Cost.getCost(State.rlist)
+            print(time.perf_counter()-start,":",cost,State.result)
+            if(cost<State.result):
+                State.setBestResult(cost)
+            self.leastAssigned(2)#max(len(State.rlist)/10,1)
+    
+    def Tabu_Search_base(self):
+        start = time.perf_counter()
+        i = 0
+        while(1):     
+            tempStart = time.perf_counter()       
+            i+=1            
+            if((time.perf_counter()-start) > self.maxtime):
+                 print('~~timeisup~~')
+                 break   #return because the time is up 
+                 
+            self.localSearch() #find local minimum of cost 
+            cost = Cost.getCost(State.rlist)
+            if(cost<State.result):
+                State.setBestResult(cost)
+            self.localSearch(method = 1) # take 1 step that increases the cost the least
+            
+                
+            if(i%100==0):
+                print(time.perf_counter()-start,i,':',cost,State.result,State.backupCost)
+                        
+    def random_restart(self):
+        i = 0
+        start = time.perf_counter()
+        State.backup(Cost.getCost(State.rlist))
+        State.setBestResult(cost)
+        while(1):         
+            i+=1            
+            if((time.perf_counter()-start) > self.maxtime):
+                 print('~~timeisup~~')
+                 break   #return because the time is up
+            self.findPeak(0) 
+            cost = Cost.getCost(State.rlist)
+            print(time.perf_counter()-start,":",cost,State.result)
+            if(cost<State.result):
+                State.setBestResult(cost)
             
             
-            
-            
-    def findPeak(self,start,margin):
+            lenCars = len(State.cars)
+            lenZones = len(Car.zoneIDtoADJ)-1
+            for _ in range(lenCars):
+                randomZoneIndex = random.randint(0, lenZones-1)
+                randomCarIndex = random.randint(0, lenCars-1)
+                State.cars[randomCarIndex].setZone(randomZoneIndex)
+
+
+    def findPeak(self,margin):
         newBest = 0        
         for i in range(100):   
             i+=1
-            self.localSearch(0) #hill_climbing
+            self.localSearch() 
             cost = Cost.getCost(State.rlist)
             if(i%50==0):
                 print("\t\t",i,':',cost,State.result)
@@ -342,12 +386,17 @@ class Tabu_Search:
                 newBest = 1
             elif(cost< State.result + margin*State.result):    
                 newBest = 2
- 
-            changed = self.perturbation()
+            
+            #intensification on most recent peak -> restore
+            if(cost<State.backupCost):
+                State.backup(Cost.getCost(State.rlist))
+            else:
+                State.restore()
+            changed = self.diversificatie()
             
             if(not(changed)):
                 print("No more changes after:",i)
-                break
+                return 0
         if(newBest == 2):
             print("margin")
         return newBest
