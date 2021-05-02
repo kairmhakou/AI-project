@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+#Prints information
 """
 Created on Mon Mar 15 17:50:39 2021
 
 @author: dehan
 """
-import random
 from State import State
 class Printer:              
     def printResult(rlist,cars):
@@ -32,10 +32,4 @@ class Printer:
         print("----------------"*2)
         
 if __name__ == "__main__":
-    random.seed(10) 
-    print(random.random())
-    print(random.random())
-    random.seed(10) 
-    print("----")
-    print(random.random())
-    print(random.random())
+    pass

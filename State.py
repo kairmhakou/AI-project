@@ -30,7 +30,11 @@ class State:
         State.resultRlist = [x.clone() for x in State.rlist]
         State.resultCars = [x.clone() for x in State.cars]
         State.result = cost
-
+    def restoreBest():
+        State.cars = [x.clone() for x in State.resultCars]
+        State.rlist = [x.clone() for x in State.resultRlist]
+        return State.result
+        
     def reset():
         State.Zones = None
 

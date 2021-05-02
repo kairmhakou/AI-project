@@ -1,5 +1,7 @@
 import csv
+
 def readCSV(Car,Reservation,f = 'toy1.csv'):
+    print(f)
     reservationList=[]
     zonesList=[]
     carsList=[]
@@ -7,7 +9,7 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
     with open(f, mode='r') as csv_file:
         csv_reader = csv.reader(csv_file , delimiter=";")
         for row in csv_reader:
-
+            
             if(row[0][:2]=="+Z"):
                 Zones = int(row[0].split(' ')[1])
             if row[0][0]=="r": #reservation
@@ -38,7 +40,6 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         Car.zoneIDtoStr[i] = z  
         Car.zoneStrtoID[z] = i
         i+=1
-       
     i = 0
     Car.zoneIDtoADJ = []
     for zone in zonesList:# loop over zone lines a second time otherwise zoneIDtoADJ will return keyError
@@ -80,30 +81,4 @@ def readCSV(Car,Reservation,f = 'toy1.csv'):
         Reservation.resIDtoStr[k] = ID
            
         k+=1
-    return cars, reservatieLijst,options,Zones
-
-def average(csvFile,rond):
-    if(rond==0):
-        return 0,999999999,0
-    num , sum =0, 0
-    min=99999999999
-    csvFile = csvFile.split('/')[-1]
-    csvFile = csvFile.split('.')[0]
-    for i in range(rond):
-        file= './csv_solutions/'+csvFile+'_solution_'+str(i+1)+'.csv'
-        #print(file)
-        with open(file, mode='r') as csv_file:
-            csv_reader = csv.reader(csv_file , delimiter=";")
-            for row in csv_reader:
-                cost=int(row[0])
-                sum+=cost
-                num+=1
-                if(cost<min):
-                    min=cost
-                    csvNum=i+1
-                break
-                
-    
-    return sum/num , min , csvNum
-
-    
+    return cars, reservatieLijst,options,Zones    

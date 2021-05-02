@@ -7,11 +7,11 @@ Created on Sun Mar 14 10:26:45 2021
 from State import State
 class Car:
     id = 0 
-    carIDtoStr = {}
-    carStrtoID = {}
-    zoneIDtoStr = {}
-    zoneStrtoID = {}
-    zoneIDtoADJ = []
+    carIDtoStr = {} #Convert carID back to string from original csv file
+    carStrtoID = {} #Convert string name of car to ID
+    zoneIDtoStr = {} #1 -> zone1 (zone name from csv file)
+    zoneStrtoID = {} #zone1 -> 1
+    zoneIDtoADJ = [] #Set of adjecent zones for each zoneID (index of list)
     
     def __init__(self,inc = 1):
         self.id = Car.id
@@ -19,6 +19,8 @@ class Car:
         self.zone = 0
         
         Car.id += inc
+        
+    # _functions: function call itself takes longer than the function itself 
     def _code(self):
         return self.zone
         

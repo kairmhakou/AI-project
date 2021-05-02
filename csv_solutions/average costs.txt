@@ -1,2 +1,0 @@
-./csv_solutions/210_5_44_25_solution
-average cost  4635.35

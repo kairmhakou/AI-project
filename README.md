@@ -1,22 +1,26 @@
-# AI-project
+# AI-project Loic Dehan, Karim Hakou, Jorne Ceulemans
 
-python main.py 300 ./csv/100_5_14_25.csv
+# Tested on python 3.8.8, ubuntu 18.04 
 
-python main.py 300 ./csv/100_5_19_25.csv 
+# arguments: csv input, csv output, timelimit, randomseed, threads
 
-python main.py 300 ./csv/210_5_33_25.csv 
+python main.py ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution.csv 300 0 1
 
-python main.py 300 ./csv/210_5_44_25.csv 
+python main.py ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution.csv 300 0 1
 
-python main.py 300 ./csv/360_5_71_25.csv 
+python main.py ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution.csv 300 0 1
+
+python main.py ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution.csv 300 0 1
+
+python main.py ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution.csv 300 0 1
 
 
-java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution_1.csv
+java -jar validator.jar ./csv/100_5_14_25.csv ./csv_solutions/100_5_14_25_solution.csv
 
-java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution_1.csv
+java -jar validator.jar ./csv/100_5_19_25.csv ./csv_solutions/100_5_19_25_solution.csv
 
-java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution_1.csv
+java -jar validator.jar ./csv/210_5_33_25.csv ./csv_solutions/210_5_33_25_solution.csv
 
-java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution_1.csv
+java -jar validator.jar ./csv/210_5_44_25.csv ./csv_solutions/210_5_44_25_solution.csv
 
-java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution_1.csv
+java -jar validator.jar ./csv/360_5_71_25.csv ./csv_solutions/360_5_71_25_solution.csv

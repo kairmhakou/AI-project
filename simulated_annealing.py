@@ -6,27 +6,26 @@ Created on Tue Mar 23 22:46:11 2021
 @author: dehan
 # """
 import random
-import copy
 import time
 import math
-import matplotlib.pyplot as plt
+
+#import matplotlib.pyplot as plt
 
 from Cost import Cost
 from Car import Car
 from State import State
 
-START_TEMPERATURE = 500 
+START_TEMPERATURE = 100 
 END_TEMPERATURE= 0
 
-MIN_ITERATIONS = 10#10
-MAX_ITERATIONS = 1000#500
-
-#NUM_ITERATIONS= 125
-#COOLING_RATE = 0.995
+MIN_ITERATIONS = 10
+MAX_ITERATIONS = 1000
 
 class Simulated_Annealing:
-    def __init__(self,maxtime ):
+    def __init__(self,maxtime,seed):
         self.maxtime = maxtime
+        self.seed = seed
+         
     
     def hill_climbing(self):
         best = 0 #improvement => >0
@@ -77,14 +76,16 @@ class Simulated_Annealing:
        
             
     def simulatedAnnealing(self):
+        random.seed(self.seed)
+        
         lenZones = len(Car.zoneIDtoADJ)-1
         lenCars = len(State.cars)-1
         
         currCost = Cost.getCost(State.rlist)	
         State.setBestResult(currCost)        
         State.backup(currCost)
-        start = time.perf_counter()
         
+        start = time.perf_counter()   
         while(1):
             if((time.perf_counter()-start) > self.maxtime):
                     print('~~timeisup~~')
@@ -92,12 +93,12 @@ class Simulated_Annealing:
 
             t = START_TEMPERATURE
             numOfIteration=MIN_ITERATIONS
-            minProbability = 1#99999999
-            #list for the plot
-            temperatureList =[t]
-            probabilityList = [minProbability]
-            iterations =[numOfIteration] #for diff/t values
-            times = [0]
+            minProbability = 1
+            #lists for the plots
+            #temperatureList =[t]
+            #probabilityList = [minProbability]
+            #iterations =[numOfIteration] #for diff/t values
+            #times = [0]
 
             while t > END_TEMPERATURE:
                 if((time.perf_counter()-start) > self.maxtime):
@@ -172,10 +173,10 @@ class Simulated_Annealing:
                 ##########################################################################
                 
                 #append to list for matplotlib graph
-                temperatureList.append(t)
-                probabilityList.append(minProbability)
-                iterations.append(numOfIteration)
-                times.append(time.perf_counter()-start)
+                # temperatureList.append(t)
+                # probabilityList.append(minProbability)
+                # iterations.append(numOfIteration)
+                # times.append(time.perf_counter()-start)
                 
                 #print progress
                 #print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)

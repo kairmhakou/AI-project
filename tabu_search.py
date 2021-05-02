@@ -4,7 +4,6 @@ Created on Tue Mar 23 22:45:53 2021
 
 @author: Loic Dehan
 """
-import copy
 import time
 import random
 
@@ -14,9 +13,10 @@ from Car import Car
 from State import State
 
 class Tabu_Search:
-    def __init__(self,solver):
-        self.maxtime = solver.maxtime
+    def __init__(self,maxtime):
+        self.maxtime = maxtime
     def steepest_descent(self,best = 999999999999999999):
+        #Unused
         bestc = None
         bestz = None    
         
@@ -203,6 +203,7 @@ class Tabu_Search:
             Tabu.add(Tabu.formCode())
 
     def Tabu_Search(self):
+        #print("Start tabu search",Cost.getCost(State.rlist))
         sinceLast = time.perf_counter()
         prevBest = 999999999999999
 
@@ -247,7 +248,7 @@ class Tabu_Search:
             changed = self.diversificatie()
             
             if(not(changed)):#No more neighbours for diversification()
-                print("=> leastAssigned")
+                #print("=> leastAssigned")
                 self.leastAssigned(amount)
                 State.backup(Cost.getCost(State.rlist))    
                 prevBest = State.backupCost

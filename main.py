@@ -1,9 +1,6 @@
-import glob
-import copy
-import time
 import sys
 
-from readCSV import readCSV , average
+from readCSV import readCSV
 from writeCSV import writeCSV
 from Car import Car
 from Reservation import Reservation
@@ -15,13 +12,13 @@ from great_deluge import Great_deluge
 from State import State
 
 class Solver:
-    def __init__(self,f,maxtime, random_seed = 10):
+    def __init__(self,f,maxtime, random_seed):
         self.maxtime = maxtime
         self.f = f
 
-        self.tabu_search = Tabu_Search(self)
-        self.simulated_annealing = Simulated_Annealing(self.maxtime)
-        self.great_deluge = Great_deluge(self)
+        self.simulated_annealing = Simulated_Annealing(self.maxtime,random_seed)
+        self.tabu_search = Tabu_Search(self.maxtime-(self.maxtime))   
+       
         
         self.sorted_rlist = []
         for e in State.rlist:
@@ -42,12 +39,12 @@ class Solver:
 
     def initialSolution(self):
         # Voor elke r:
-        #   Not assigned -> kijk of er een auto in juiste zone staat -> geen overlap? -> add
-        #   Not assigned -> kijk of er een auto in adj zone staat -> geen ovlerap -> add
-        #   Kijk of er een auto nog geen reservaties heeft -> verplaats auto naar r.zone en add
+        #   Not assigned -> Look for car in the right zone -> no overlap? -> add r
+        #   Not assigned -> Look for car in the adjecent zone -> no ovlerap -> add r
+        #   If a car has no reservations yet -> move car to r.zone and add r
         
-        #Volgorde r.id(State.rlist)             : #32690 -> 15290
-        #Volgorde grootste P1(self.sorted_rlist): #32690 -> 12360 
+        #order by r.id(State.rlist)             : #32690 -> 15290
+        #ordered by P1(self.sorted_rlist): #32690 -> 12360 
         for r in self.sorted_rlist:
             if(r.notAssigned):
                 for cid in State.options[r.id]:
@@ -72,11 +69,11 @@ class Solver:
                             c.addR(r)
                             break
                             
-def main(argTime,argFile,fileNum):
+def main(argTime,argFile,argFileOut,argSeed):
     State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,argFile)#Read data from csv file
     State.RassignCount = [0]*len(State.rlist)
     
-    solver = Solver(argFile,argTime)
+    solver = Solver(argFile,argTime,argSeed)
     solver.freeData()#Initialize empty solution
    
     print("Empty solution cost:",Cost.getCost(State.rlist))
@@ -90,7 +87,7 @@ def main(argTime,argFile,fileNum):
     print("----------------"*2)
 
     print(Cost.getCost(State.resultRlist))
-    writeCSV(argFile,fileNum)
+    writeCSV(argFileOut)
     
 def oneTime():
     argFile=sys.argv[1]
@@ -99,39 +96,17 @@ def oneTime():
     argSeed=int(sys.argv[4])
     argThreads=int(sys.argv[5])#unused
     
-    main(argTime,argFile,1,argFileOut,argSeed)
+    main(argTime,argFile,argFileOut,argSeed)
 
 def resetAll():
     Reservation.id = 0
     Car.id = 0
     State.reset()
-    
-    
     Tabu.tabuList = set()
-def averageX():
-    fileNum = 0
-    
-    argTime=int(sys.argv[1])
-    argFile=sys.argv[2]
-    while(fileNum < 20):
-        resetAll()
-        averageCost, bestCost, bestCsvNum = average(argFile,fileNum) 
-        #print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
-        Car.zoneIDtoADJ=[]
-        fileNum+=1
-        main(argTime,argFile , fileNum)
-
-    averageCost, bestCost, bestCsvNum = average(argFile,fileNum) 
-    print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
-    averages = open("averages.txt","a")#write mode
-    string = 'average cost '+str(averageCost)+ ', best cost '+str(bestCost)+ ' best csv ' + str(bestCsvNum)
-    averages.write(string+"\n")
-    averages.close()
 
     
 if __name__ == "__main__":
-    #oneTime()
-    averageX() 
+    oneTime()
  
   
 
