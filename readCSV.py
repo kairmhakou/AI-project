@@ -91,7 +91,7 @@ def average(csvFile,rond):
     csvFile = csvFile.split('.')[0]
     for i in range(rond):
         file= './csv_solutions/'+csvFile+'_solution_'+str(i+1)+'.csv'
-        print(file)
+        #print(file)
         with open(file, mode='r') as csv_file:
             csv_reader = csv.reader(csv_file , delimiter=";")
             for row in csv_reader:

@@ -310,23 +310,6 @@ class Tabu_Search:
             #All assignments are tabu
             print("No Forced assign")           
             return 0
-            
-    def least_Assigned_Restart(self):
-        i = 0
-        start = time.perf_counter()
-        while(1):         
-            i+=1            
-            if((time.perf_counter()-start) > self.maxtime):
-                 print('~~timeisup~~')
-                 break   #return because the time is up
-            if(not(self.findPeak(0))):
-                print("test")
-                self.leastAssigned(20)
-            cost = Cost.getCost(State.rlist)
-            print(time.perf_counter()-start,":",cost,State.result)
-            if(cost<State.result):
-                State.setBestResult(cost)
-            self.leastAssigned(2)#max(len(State.rlist)/10,1)
     
     def Tabu_Search_base(self):
         start = time.perf_counter()

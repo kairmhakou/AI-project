@@ -73,40 +73,39 @@ class Solver:
                             break
                             
 def main(argTime,argFile,fileNum):
-    State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,argFile)
+    State.cars, State.rlist,State.options,State.zones = readCSV(Car,Reservation,argFile)#Read data from csv file
     State.RassignCount = [0]*len(State.rlist)
     
     solver = Solver(argFile,argTime)
-    solver.freeData()
+    solver.freeData()#Initialize empty solution
    
-    print("Pre-initial cose:",Cost.getCost(State.rlist))
+    print("Empty solution cost:",Cost.getCost(State.rlist))
     solver.initialSolution()
-    print("initial cose:",Cost.getCost(State.rlist))
+    print("Initial solution cost:",Cost.getCost(State.rlist))
     State.curCost = Cost.getCost(State.rlist)
+    
     print("----------------"*2)#Choose Method
-    
-    #solver.simulated_annealing.simulatedAnnealing()
-    solver.tabu_search.Tabu_Search()
-    
-    #solver.tabu_search.random_restart()#unused
-    #solver.tabu_search.Tabu_Search_base()#unused
-    
-    # solver.great_deluge.staydry(Cost.getCost(State.rlist)/20)#unused
-    
+    solver.simulated_annealing.simulatedAnnealing()
+    #solver.tabu_search.Tabu_Search()
     print("----------------"*2)
 
     print(Cost.getCost(State.resultRlist))
     writeCSV(argFile,fileNum)
     
 def oneTime():
-    argTime=int(sys.argv[1])
-    argFile=sys.argv[2]
-    main(argTime,argFile,1)
+    argFile=sys.argv[1]
+    argFileOut=sys.argv[2]
+    argTime=int(sys.argv[3])
+    argSeed=int(sys.argv[4])
+    argThreads=int(sys.argv[5])#unused
+    
+    main(argTime,argFile,1,argFileOut,argSeed)
 
 def resetAll():
     Reservation.id = 0
     Car.id = 0
     State.reset()
+    
     
     Tabu.tabuList = set()
 def averageX():
@@ -114,10 +113,10 @@ def averageX():
     
     argTime=int(sys.argv[1])
     argFile=sys.argv[2]
-    while(fileNum < 5):
+    while(fileNum < 20):
         resetAll()
         averageCost, bestCost, bestCsvNum = average(argFile,fileNum) 
-        print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
+        #print('average cost ',averageCost, ', best cost ', bestCost, ' best csv ' , bestCsvNum)
         Car.zoneIDtoADJ=[]
         fileNum+=1
         main(argTime,argFile , fileNum)
@@ -131,8 +130,8 @@ def averageX():
 
     
 if __name__ == "__main__":
-    oneTime()
-    #averageX() 
+    #oneTime()
+    averageX() 
  
   
 

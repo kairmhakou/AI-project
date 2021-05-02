@@ -11,13 +11,13 @@ from Car import Car
 def writeCSV(f, fileNum):
     
     
-    print(f)
+    #print(f)
     f = f.split('/')[-1]
     #f = f.split('\\')[-1] #een van deze twee splits afh. van OS denk ik
     #bij errors misschien vervangen
     
     f = f.split('.')[0]
-    print(f)
+    #print(f)
     
 
     rlist,cars,cost = State.resultRlist,State.resultCars,State.result

@@ -15,10 +15,10 @@ from Cost import Cost
 from Car import Car
 from State import State
 
-START_TEMPERATURE = 100 
+START_TEMPERATURE = 500 
 END_TEMPERATURE= 0
 
-MIN_ITERATIONS = 100#10
+MIN_ITERATIONS = 10#10
 MAX_ITERATIONS = 1000#500
 
 #NUM_ITERATIONS= 125
@@ -94,10 +94,10 @@ class Simulated_Annealing:
             numOfIteration=MIN_ITERATIONS
             minProbability = 1#99999999
             #list for the plot
-            # temperatureList =[t]
-            # probabilityList = [minProbability]
-            # iterations =[numOfIteration] #for diff/t values
-            # times = [0]
+            temperatureList =[t]
+            probabilityList = [minProbability]
+            iterations =[numOfIteration] #for diff/t values
+            times = [0]
 
             while t > END_TEMPERATURE:
                 if((time.perf_counter()-start) > self.maxtime):
@@ -146,20 +146,21 @@ class Simulated_Annealing:
                 
                 ##########################################################################
                 # 1) Exponential cooling
-                t = 110*(1.01**(-secondsPassedScaled))- 5.4 # y=110\left(1.01^{-x}\right)-5.4
+                #t = 110*(1.01**(-secondsPassedScaled))- 5.4 # y=110\left(1.01^{-x}\right)-5.4
                 
                 # 2) Logaritmic cooling:
-                # t = -44*math.log(0.6*(secondsPassedScaled+1.5),10)+99.5 # y=-44\cdot\log\left(0.6\left(x+1.5\right)\right)+99.5
+                #t = -44*math.log(0.6*(secondsPassedScaled+1.5),10)+99.5 # y=-44\cdot\log\left(0.6\left(x+1.5\right)\right)+99.5
                 
                 # 3) Linear cooling:
-                #t = START_TEMPERATURE + ((END_TEMPERATURE-START_TEMPERATURE)/300)*secondsPassedScaled
+                t = START_TEMPERATURE + ((END_TEMPERATURE-START_TEMPERATURE)/300)*secondsPassedScaled
                 
                 # 4) Gometric: ni zeker wat Gometric is maar werkt wel goed
                 #t = 0.99**(secondsPassedScaled-460)-4.8 # y=0.99^{x\ -\ 460\ }-4.8
                 #   t *= COOLING_RATE 
 
                 # Linear increase of iterations over time
-                numOfIteration = MIN_ITERATIONS + ((MAX_ITERATIONS-MIN_ITERATIONS)/300)*secondsPassedScaled#y=25+\frac{\left(100-25\right)}{300}x
+                numOfIteration = MIN_ITERATIONS + ((MAX_ITERATIONS-MIN_ITERATIONS)/300)*secondsPassedScaled
+                #y=25+\frac{\left(100-25\right)}{300}x
 
 
                 #Not (yet) independant of problem size
@@ -171,15 +172,16 @@ class Simulated_Annealing:
                 ##########################################################################
                 
                 #append to list for matplotlib graph
-                # temperatureList.append(t)
-                # probabilityList.append(minProbability)
-                # iterations.append(numOfIteration)
-                # times.append(time.perf_counter()-start)
+                temperatureList.append(t)
+                probabilityList.append(minProbability)
+                iterations.append(numOfIteration)
+                times.append(time.perf_counter()-start)
                 
                 #print progress
-                print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
-        """
+                #print(time.perf_counter()-start,numOfIteration,"t" , t ," cost " ,"best:",State.result,"current",newCost,"Backup",State.backupCost)
+        
         #Graph x - Time
+        """
         plt.plot(times,iterations)
         plt.show()
         plt.plot(times,temperatureList)
